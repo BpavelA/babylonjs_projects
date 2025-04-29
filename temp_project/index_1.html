@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Babylon.js sample code</title>
+
+    <!-- Babylon.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+    <script src="https://assets.babylonjs.com/generated/Assets.js"></script>
+    <script src="https://cdn.babylonjs.com/recast.js"></script>
+    <script src="https://cdn.babylonjs.com/ammo.js"></script>
+    <script src="https://cdn.babylonjs.com/havok/HavokPhysics_umd.js"></script>
+    <script src="https://cdn.babylonjs.com/cannon.js"></script>
+    <script src="https://cdn.babylonjs.com/Oimo.js"></script>
+    <script src="https://cdn.babylonjs.com/earcut.min.js"></script>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script src="https://cdn.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+    <script src="https://cdn.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+    <script src="https://cdn.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+
+      #canvasZone {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="canvasZone"><canvas id="renderCanvas"></canvas></div>
+    <script>
+      var canvas = document.getElementById("renderCanvas");
+
+      var startRenderLoop = function (engine, canvas) {
+        engine.runRenderLoop(function () {
+          if (sceneToRender && sceneToRender.activeCamera) {
+            sceneToRender.render();
+          }
+        });
+      };
+
+      var engine = null;
+      var scene = null;
+      var sceneToRender = null;
+      var createDefaultEngine = function () {
+        return new BABYLON.Engine(canvas, true, {
+          preserveDrawingBuffer: true,
+          stencil: true,
+          disableWebGL2Support: false,
+        });
+      };
+      const idealLength = 0.4;
+      var localTime = 999;
+      var localTimeSub = 999;
+      var behaviorTarget = new BABYLON.Vector3(0, 0, 0);
+      var happiness = 0;
+      var excitement = 0;
+      var ballThrown = false;
+      var ballCaught = false;
+      var constrain = function (curlyFactor, index, A, B, targetLength) {
+        var pA = A.absolutePosition;
+        var pB = B.absolutePosition;
+
+        var idealPos = pA.clone();
+        var up = A.up.clone();
+        var forward = A.forward.clone();
+        forward.scaleInPlace(targetLength);
+        idealPos.addInPlace(forward);
+
+        var curly = A.up.clone();
+        curly.scaleInPlace(
+          0.085 *
+            index *
+            curlyFactor *
+            Math.sin((index / 7) * (Math.PI * 0.5)) *
+            happiness
+        );
+        idealPos.addInPlace(curly);
+
+        var lerpPos = BABYLON.Vector3.Lerp(pB, idealPos, 0.25);
+        var delta = lerpPos.subtract(pA);
+        var len = delta.length();
+        var dif = targetLength - len;
+
+        var normalizedDir = delta.clone();
+        normalizedDir.normalize();
+        var targetPos = normalizedDir.clone();
+        targetPos.scaleInPlace(dif);
+        targetPos.addInPlace(lerpPos);
+
+        var mat = BABYLON.Matrix.LookAtRH(targetPos, pA, up);
+        mat.invert();
+        mat.decompose(null, B.rotationQuaternion, B.position);
+      };
+
+      var getCameraDestinationTarget = function (camera, distance, local) {
+        var target = camera.position.clone();
+
+        var up = camera.getDirection(new BABYLON.Vector3(0, 1, 0));
+        var right = camera.getDirection(new BABYLON.Vector3(1, 0, 0));
+        var forward = camera.getDirection(new BABYLON.Vector3(0, 0, 1));
+        if (local) {
+          forward.x = 0;
+          forward.y = 0;
+          forward.z = 0;
+
+          target.x = 0;
+          target.y = 0;
+          target.z = 0;
+        }
+        up.scaleInPlace(Math.random() * 0.5 - 0.25);
+        right.scaleInPlace(Math.random() * 0.5 - 0.25);
+        forward.addInPlace(up);
+        forward.addInPlace(right);
+        target.addInPlaceFromFloats(
+          forward.x * distance,
+          forward.y * distance,
+          forward.z * distance
+        );
+        target.x = -target.x;
+        return target;
+      };
+
+      var behaviorWaiting = function (camera, transform) {
+        localTime += 0.016;
+        localTimeSub += 0.016;
+        if (happiness < 0.9 && localTime > 2) {
+          localTime = 0;
+          localTimeSub = 0;
+          behaviorTarget = getCameraDestinationTarget(camera, 9, false);
+        }
+
+        if (excitement && localTimeSub > 0.5) {
+          localTimeSub = 0;
+          behaviorTarget.addInPlace(
+            getCameraDestinationTarget(camera, 2.5, true)
+          );
+        }
+
+        transform.position = BABYLON.Vector3.Lerp(
+          transform.position,
+          behaviorTarget,
+          0.1
+        );
+        if (transform.position.y < 1) {
+          transform.position.y = 1;
+        }
+      };
+
+      var behaviorCatching = function (ball, transform, camera) {
+        localTime += 0.2;
+        transform.position = BABYLON.Vector3.Lerp(
+          transform.position,
+          ball.position,
+          Math.min(localTime / 30, 0.4)
+        );
+        transform.position.y += Math.cos(localTime) * 0.08;
+
+        const diff = transform.position.subtract(ball.position).length();
+        if (diff < 0.15 && localTime > 50) {
+          localTime = 0;
+          ballCaught = true;
+          behaviorTarget = BABYLON.Vector3.Lerp(
+            getCameraDestinationTarget(camera, 9, false),
+            camera.position,
+            0.5
+          );
+        }
+      };
+
+      var behaviorCaughtback = function (ball, transform) {
+        localTime += 0.2;
+        transform.position = BABYLON.Vector3.Lerp(
+          transform.position,
+          behaviorTarget,
+          0.025
+        );
+        transform.position.y += Math.cos(localTime) * 0.08;
+        const diff = transform.position.subtract(behaviorTarget).length();
+        if (diff < 0.15) {
+          ballCaught = false;
+          ballThrown = false;
+        }
+      };
+
+      var createScene = async function () {
+        // Create basic scene
+        var scene = new BABYLON.Scene(engine);
+        var camera = new BABYLON.FreeCamera(
+          "camera1",
+          new BABYLON.Vector3(0, 5, 10),
+          scene
+        );
+        camera.setTarget(BABYLON.Vector3.Zero());
+        //camera.attachControl(canvas, true);
+        var light = new BABYLON.HemisphericLight(
+          "light1",
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        );
+        light.intensity = 0.7;
+
+        await BABYLON.SceneLoader.AppendAsync(
+          "https://raw.githubusercontent.com/BabylonJS/Assets/master/meshes/",
+          "octopus_customRig.glb",
+          scene
+        );
+
+        await BABYLON.SceneLoader.AppendAsync(
+          "https://raw.githubusercontent.com/BabylonJS/Assets/master/meshes/",
+          "ballMesh.glb",
+          scene
+        );
+
+        // Physics
+
+        var ball = scene.getMeshByName("ballMesh_low").parent;
+        ball.scaling = new BABYLON.Vector3(20, 20, 20);
+        scene.enablePhysics(
+          new BABYLON.Vector3(0, -0.81, 0),
+          new BABYLON.AmmoJSPlugin()
+        );
+        ball.physicsImpostor = new BABYLON.PhysicsImpostor(
+          ball,
+          BABYLON.PhysicsImpostor.SphereImpostor,
+          { mass: 1, restitution: 0.5 },
+          scene
+        );
+        let ball2 = scene.getMeshByName("ballMesh_low");
+        let ballMaterial = new BABYLON.StandardMaterial("ball-material", scene);
+        ballMaterial.diffuseTexture = new BABYLON.Texture(
+          "./textures/ball_textures.jpg"
+        );
+        ball2.material = ballMaterial;
+
+        // Create utility layer the gizmo will be rendered on
+        var utilLayer = new BABYLON.UtilityLayerRenderer(scene);
+
+        var tentacles = [];
+        var heads = [];
+
+        var handleTransform = new BABYLON.TransformNode("handle");
+        //handleTransform.position.y = 0.5;
+
+        var bodyTransform = new BABYLON.TransformNode("body");
+        bodyTransform.parent = handleTransform;
+
+        const skinRoot = scene.getTransformNodeByName("skinRoot");
+        skinRoot.scaling = new BABYLON.Vector3(30, 30, 30);
+
+        const skinMesh = scene.getMeshByName("octopus_low");
+        skinMesh.setBoundingInfo(
+          new BABYLON.BoundingInfo(
+            new BABYLON.Vector3(-1000, -1000, -1000),
+            new BABYLON.Vector3(1000, 1000, 1000)
+          )
+        );
+
+        for (let j = 0; j < 8; j++) {
+          boxes = [];
+          var angle = j * Math.PI * 0.25;
+          for (let i = 0; i < 10; i++) {
+            var box = new BABYLON.TransformNode("", scene);
+            box.rotationQuaternion = BABYLON.Quaternion.FromEulerAngles(
+              0.5,
+              angle,
+              0
+            );
+            boxes.push(box);
+          }
+          boxes[0].parent = bodyTransform;
+
+          tentacles.push(boxes);
+        }
+
+        for (let j = 0; j < 2; j++) {
+          boxes = [];
+          var angle = j * Math.PI * 0.25;
+          for (let i = 0; i < 2; i++) {
+            var box = BABYLON.Mesh.CreateBox("box", 0.001, scene);
+            box.rotationQuaternion = BABYLON.Quaternion.FromEulerAngles(
+              j ? -2.9 : -1.65,
+              0,
+              0
+            );
+            boxes.push(box);
+          }
+          boxes[0].parent = bodyTransform;
+
+          heads.push(boxes);
+        }
+
+        var time = 0;
+
+        scene.onPointerDown = function castRayThrow() {
+          var ray = scene.createPickingRay(
+            scene.pointerX,
+            scene.pointerY,
+            BABYLON.Matrix.Identity(),
+            camera
+          );
+
+          var hit = scene.pickWithRay(ray);
+
+          if (hit.pickedMesh) {
+            if (hit.pickedMesh.name == "ballMesh_low" && !ballThrown) {
+              ball.physicsImpostor.setLinearVelocity(
+                new BABYLON.Vector3(0, 0, 0)
+              );
+              ball.physicsImpostor.applyImpulse(
+                camera
+                  .getForwardRay(1)
+                  .direction.scale(5)
+                  .addInPlace(new BABYLON.Vector3(0, 2, 0)),
+                ball.getAbsolutePosition()
+              );
+
+              ballThrown = true;
+              ballCaught = false;
+              localTime = 0;
+            }
+          }
+        };
+
+        scene.onPointerMove = function castRay() {
+          var ray = scene.createPickingRay(
+            scene.pointerX,
+            scene.pointerY,
+            BABYLON.Matrix.Identity(),
+            camera
+          );
+          var hit = scene.pickWithRay(ray);
+          happiness = 0;
+          excitement = 0;
+          if (hit.pickedMesh) {
+            if (hit.pickedMesh.name == "ballMesh_low") {
+              excitement = 1;
+              happiness = 0.3;
+            } else if (hit.pickedMesh.name == "octopus_low") {
+              happiness = 1;
+            }
+          }
+        };
+
+        scene.onBeforeRenderObservable.add(function () {
+          // behavior
+          if (!ballThrown && !ballCaught) {
+            ball.position = camera.position.clone();
+            ball.position.addInPlace(
+              camera.getForwardRay().direction.scale(1.5)
+            );
+            ball.position.addInPlace(camera.upVector.scale(-0.5));
+            behaviorWaiting(camera, handleTransform);
+          } else {
+            if (ballCaught) {
+              behaviorCaughtback(ball, handleTransform);
+            } else {
+              behaviorCatching(ball, handleTransform, camera);
+            }
+          }
+
+          // handle animation
+          var mv = new BABYLON.Vector3(
+            Math.cos(time * 0.1) * Math.cos(time * 0.17) * 0.09,
+            Math.sin(time * 0.08) * 0.1 + Math.cos(time * 0.12) * 0.15,
+            0
+          );
+          bodyTransform.position = mv;
+
+          skinRoot.position.copyFrom(handleTransform.position);
+          skinRoot.position.addInPlace(mv);
+          skinRoot.rotationQuaternion = handleTransform.rotationQuaternion;
+
+          for (let j = 0; j < tentacles.length; j++) {
+            let boxes = tentacles[j];
+            const curlyFactor = Math.cos(j * 16789.287 + time * 0.0571);
+            for (let i = 0; i < boxes.length - 1; i++) {
+              constrain(curlyFactor, i, boxes[i], boxes[i + 1], idealLength);
+            }
+            var angle = j * Math.PI * 0.25;
+            boxes[0].rotationQuaternion = BABYLON.Quaternion.FromEulerAngles(
+              0.8 + Math.cos(j * 4.8 + time * 0.1) * 0.2,
+              angle,
+              0
+            );
+
+            for (let i = 0; i < boxes.length; i++) {
+              var bn = scene.getTransformNodeByName("Bone" + j + i);
+              if (i) {
+                var invParent = new BABYLON.Quaternion();
+                BABYLON.Quaternion.InverseToRef(
+                  boxes[i - 1].rotationQuaternion,
+                  invParent
+                );
+                invParent.multiplyToRef(
+                  boxes[i].rotationQuaternion,
+                  bn.rotationQuaternion
+                );
+              } else {
+                var invParent = new BABYLON.Quaternion();
+                BABYLON.Quaternion.InverseToRef(
+                  boxes[i].rotationQuaternion,
+                  invParent
+                );
+                bn.rotationQuaternion = boxes[i].rotationQuaternion;
+              }
+            }
+
+            for (let j = 0; j < 2; j++) {
+              let boxes = heads[j];
+              for (let i = 0; i < boxes.length - 1; i++) {
+                constrain(
+                  0,
+                  0,
+                  boxes[i],
+                  boxes[i + 1],
+                  idealLength * (j ? 2 : 1)
+                );
+              }
+
+              for (let i = 1; i < boxes.length; i++) {
+                var bn = scene.getTransformNodeByName("Head" + j + i);
+                //bn.setAbsolutePosition(boxes[i].position.clone());
+                if (bn.parent) {
+                  var invParent = new BABYLON.Quaternion();
+                  BABYLON.Quaternion.InverseToRef(
+                    boxes[i - 1].rotationQuaternion,
+                    invParent
+                  );
+                  invParent.multiplyToRef(
+                    boxes[i].rotationQuaternion,
+                    bn.rotationQuaternion
+                  );
+                }
+              }
+            }
+          }
+          time += 0.4;
+        });
+
+        return scene;
+      };
+      window.initFunction = async function () {
+        await Ammo();
+
+        var asyncEngineCreation = async function () {
+          try {
+            return createDefaultEngine();
+          } catch (e) {
+            console.log(
+              "the available createEngine function failed. Creating the default engine instead"
+            );
+            return createDefaultEngine();
+          }
+        };
+
+        window.engine = await asyncEngineCreation();
+        if (!engine) throw "engine should not be null.";
+        startRenderLoop(engine, canvas);
+        window.scene = createScene();
+      };
+      initFunction().then(() => {
+        scene.then((returnedScene) => {
+          sceneToRender = returnedScene;
+        });
+      });
+
+      // Resize
+      window.addEventListener("resize", function () {
+        engine.resize();
+      });
+    </script>
+  </body>
+</html>
