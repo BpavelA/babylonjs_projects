@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Babylon Template</title>
+
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas" touch-action="none"></canvas>
+    <!-- touch-action="none" for best results from PEP -->
+
+    <script>
+      const canvas = document.getElementById("renderCanvas"); // Получение элемента canvas
+      const engine = new BABYLON.Engine(canvas, true); // Создание движка BABYLON 3D
+
+      // Создание сцены
+
+      var createScene = function () {
+        // Создание базового объекта сцены Babylon
+        var scene = new BABYLON.Scene(engine);
+
+        // Создание и позиционирование камеры
+        const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI*1.5, Math.PI / 3, 30, new BABYLON.Vector3(0, 0, 0));
+        camera.attachControl(canvas, true);
+
+        // Создание источника света
+        var light = new BABYLON.HemisphericLight(
+          "light",
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        );
+
+        // Задание источнику света интенсивности
+        light.intensity = 0.7;
+
+        // Создание мешей (двух цилиндров)
+        const cylinder1 = BABYLON.MeshBuilder.CreateCylinder("cylinder", {diameter: 0.3, height: 2}, scene);
+        const cylinder2 = BABYLON.MeshBuilder.CreateCylinder("cylinder", {diameter: 0.3, height: 2}, scene);
+        const box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: 1, depth: 1}, scene);
+        
+        // Позиционирование цилиндров
+        cylinder1.position = new BABYLON.Vector3(0, 1, 5);
+        cylinder2.position = new BABYLON.Vector3(0, 1, -5);
+        box.position = new BABYLON.Vector3(0, 3, 0)
+
+        // Импорт glb-модели из каталога
+        BABYLON.ImportMeshAsync("car.glb", scene).then((result) => {
+        
+        var car = scene.getMeshByName("car");
+
+        // Масштабирование, позиционирование и вращение модели
+        car.scaling = new BABYLON.Vector3(5, 5, 5);
+        car.position = new BABYLON.Vector3(-5, 0.81, 0.5);
+        car.rotation = new BABYLON.Vector3(Math.PI*1.5, Math.PI, 0);
+        
+        let wheelRB = scene.getMeshByName("wheelRB");
+        let wheelRF = scene.getMeshByName("wheelRF");
+        let wheelLB = scene.getMeshByName("wheelLB");
+        let wheelLF = scene.getMeshByName("wheelLF");
+        
+        
+
+        
+        const animWheel = new BABYLON.Animation("wheelAnimation", "rotation.x", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+        const animCar = new BABYLON.Animation("carAnimation", "position.x", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+        
+
+        const carKeys = [];
+        const wheelKeys = [];
+        
+        wheelKeys.push({frame: 0, value: 0,});
+        wheelKeys.push({frame: 30, value: Math.PI * 2,});
+
+        carKeys.push({frame: 0, value: -8});
+        carKeys.push({frame: 150, value: 8});
+        carKeys.push({frame: 210, value: 16});
+
+        animWheel.setKeys(wheelKeys);
+        animCar.setKeys(carKeys);
+        
+        wheelRB.animations = [];
+        wheelRB.animations.push(animWheel);
+        scene.beginAnimation(wheelRB, 0, 30, true);
+
+        wheelRF.animations = [];
+        wheelRF.animations.push(animWheel);
+        scene.beginAnimation(wheelRF, 0, 30, true);
+
+        wheelLB.animations = [];
+        wheelLB.animations.push(animWheel);
+        scene.beginAnimation(wheelLB, 0, 30, true);
+
+        wheelLF.animations = [];
+        wheelLF.animations.push(animWheel);
+        scene.beginAnimation(wheelLF, 0, 30, true);
+
+        car.animations = [];
+        car.animations.push(animCar);
+        scene.beginAnimation(car, 0, 210, true);
+
+        box.animations = [];
+        box.animations.push(animWheel);
+        scene.beginAnimation(box, 0, 30, true);
+
+        cylinder1.animations = [];
+        cylinder1.animations.push(animWheel);
+        scene.beginAnimation(cylinder1, 0, 30, true);
+        });
+        
+        //Создание "земли"
+        var ground = BABYLON.MeshBuilder.CreateGround(
+          "ground",
+          { width: 100, height: 4 },
+          scene
+        );
+
+        // Создание материала
+        const cylinderMat = new BABYLON.StandardMaterial("cylinderMat", scene);
+        const groundText = new BABYLON.StandardMaterial("groundText", scene);
+        // Задание материалу цвета, текстуры
+        cylinderMat.diffuseColor = new BABYLON.Color3(2, 222, 222);
+        groundText.diffuseTexture = new BABYLON.Texture("road.jpg");
+        // Наложение материала на меши (цилиндры)
+        cylinder1.material = cylinder2.material = cylinderMat;
+        ground.material = groundText;
+        // Включаем инспектор в совмещенном режиме
+        scene.debugLayer.show({embedMode: true,});
+
+        return scene;
+      };
+
+      const scene = createScene(); //Вызов функции createScene, которая создает сцену
+
+      // Register a render loop to repeatedly render the scene
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      // Watch for browser/canvas resize events
+      window.addEventListener("resize", function () {
+        engine.resize();
+      });
+    </script>
+  </body>
+</html>
