@@ -20,10 +20,11 @@
         touch-action: none;
       }
     </style>
-    <script src="https://cdn.babylonjs.com/havok/HavokPhysics_umd.js"></script>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    
   </head>
 
   <body>
@@ -33,14 +34,14 @@
     <script>
       const canvas = document.getElementById("renderCanvas"); // Получение элемента canvas
       const engine = new BABYLON.Engine(canvas, true); // Создание движка BABYLON 3D
-
       // Создание сцены
 
       var createScene = function () {
+        
         // Создание базового объекта сцены Babylon
         var scene = new BABYLON.Scene(engine);
 
-        // Создание и позиционирование камеры
+       // Создание и позиционирование камеры
         const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI*1.5, Math.PI / 3, 30, new BABYLON.Vector3(0, 0, 0));
         camera.attachControl(canvas, true);
 
@@ -54,10 +55,13 @@
         // Задание источнику света интенсивности
         light.intensity = 0.7;
 
+        // Создание физического движка
+        scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin(true, CANNON));
+
         // Создание мешей (двух цилиндров)
         const cylinder1 = BABYLON.MeshBuilder.CreateCylinder("cylinder", {diameter: 0.3, height: 2}, scene);
         const cylinder2 = BABYLON.MeshBuilder.CreateCylinder("cylinder", {diameter: 0.3, height: 2}, scene);
-        const box = BABYLON.MeshBuilder.CreateBox("box", {height: 0.1, width: 7, depth: 7}, scene);
+        const box = BABYLON.MeshBuilder.CreateBox("box", {height: 0.1, width: 3, depth: 3}, scene);
         const ball = BABYLON.MeshBuilder.CreateSphere("ball", {diameter: 1,}, scene);
         
         // Позиционирование цилиндров
@@ -66,12 +70,13 @@
         box.position = new BABYLON.Vector3(0, 0, 0);
         ball.position = new BABYLON.Vector3(0, 5, 0);
         
-        //Создание "земли"
-        // var ground = BABYLON.MeshBuilder.CreateGround(
-        //   "ground",
-        //   { width: 100, height: 4 },
-        //   scene
-        // );
+        box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0, restitution: 0.7}, scene);
+        ball.physicsImpostor = new BABYLON.PhysicsImpostor(ball, BABYLON.PhysicsImpostor.SphereImpostor, {mass: 1, restitution: 1.3}, scene);
+        
+        // Создание "земли"
+        var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 20, height: 20, }, scene);
+
+        ground.position.y = -5;
 
         // Создание материала
         const cylinderMat = new BABYLON.StandardMaterial("cylinderMat", scene);
@@ -82,13 +87,6 @@
         // Наложение материала на меши (цилиндры)
         cylinder1.material = cylinder2.material = cylinderMat;
         
-        // const havokInstance = HavokPhysics();
-        // scene.enablePhysics(new BABYLON.Vector3(0, -9.8, 0), new BABYLON.HavokPlugin(true, havokInstance));
-        
-        // var ballAggregate = new BABYLON.PhysicsAggregate(ball, BABYLON.PhysicsShapeType.SPHERE, { mass: 1, restitution:0.75}, scene);
-        // var boxAggregate = new BABYLON.PhysicsAggregate(box, BABYLON.PhysicsShapeType.BOX, { mass: 0 }, scene);
-
-
         // Включаем инспектор в совмещенном режиме
         scene.debugLayer.show({embedMode: true,});
 
