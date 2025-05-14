@@ -82,7 +82,7 @@
         
 
         
-        const animWheel = new BABYLON.Animation("wheelAnimation", "rotation.x", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+        const animWheel = new BABYLON.Animation("wheelAnimation", "rotation.z", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
         const animCar = new BABYLON.Animation("carAnimation", "position.x", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
         
 
@@ -90,7 +90,7 @@
         const wheelKeys = [];
         
         wheelKeys.push({frame: 0, value: 0,});
-        wheelKeys.push({frame: 30, value: Math.PI * 2,});
+        wheelKeys.push({frame: 30, value: Math.PI*2,});
 
         carKeys.push({frame: 0, value: -8});
         carKeys.push({frame: 150, value: 8});
