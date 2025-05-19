@@ -19,19 +19,35 @@ var createScene = function () {
   // Создание базового объекта сцены Babylon
   var scene = new BABYLON.Scene(engine);
 
-  const axes = new BABYLON.AxesViewer(scene, 5); // 2 — размер осей
-  axes.xAxis.color = BABYLON.Color3.Red();    // X — красный
-  axes.yAxis.color = BABYLON.Color3.Green(); // Y — зелёный
-  axes.zAxis.color = BABYLON.Color3.Blue();  // Z — синий
+  // const axes = new BABYLON.AxesViewer(scene, 5); // 2 — размер осей
+  // axes.xAxis.color = BABYLON.Color3.Red();    // X — красный
+  // axes.yAxis.color = BABYLON.Color3.Green(); // Y — зелёный
+  // axes.zAxis.color = BABYLON.Color3.Blue();  // Z — синий
 
   scene.collisionsEnabled = true; // Включить коллизии для всей сцены
-  // scene.gravity = new BABYLON.Vector3(0, -0.98, 0); // Гравитация (если нужно падение)
+  scene.gravity = new BABYLON.Vector3(0, -0.98, 0); // Гравитация (если нужно падение)
 
-  // Создание и позиционирование камеры
+  // КАМЕРА
+
+  // ARC ROTATE
   // var camera = new BABYLON.ArcRotateCamera("camera", Math.PI * 1.5, 1, 30, new BABYLON.Vector3(0, 0, 1));
+  
+  // UNIVERSAL
   const camera = new BABYLON.UniversalCamera("fpsCamera", new BABYLON.Vector3(0.5, 0.5, -8.5), scene);
-  // Закрепление камеры на холсте
-  camera.attachControl(canvas, true);
+  camera.setTarget(BABYLON.Vector3.Zero())
+
+
+  // FOLLOW
+  
+  // const camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0.5, 0.5, -10.5), scene);
+  
+  // camera.radius = -2;   // Высота цели камеры над локальной точкой (центром) цели
+  // camera.heightOffset = 0;   // Целевой поворот камеры вокруг локального начала (центра) цели в плоскости x, y
+  // camera.rotationOffset = 0;   // Ускорение камеры при переходе от текущей позиции к цели
+  // camera.cameraAcceleration = 0.005;   // Скорость, при которой ускорение прекращается
+  // camera.maxCameraSpeed = 5;   // Максимальная скорость камеры
+  // scene.activeCamera = camera; // Активация камеры
+  
   // Настройки камеры
   // camera.applyGravity = true;        // Включить гравитацию (если нужно)
   // camera.checkCollisions = true;     // Включить коллизии
@@ -41,10 +57,14 @@ var createScene = function () {
   // camera.keysDown = [83];            // S (назад)
   // camera.keysLeft = [65];            // A (влево)
   // camera.keysRight = [68];           // D (вправо)
-  camera.upperBetaLimit = Math.PI / 2; // Макс. угол наклона вниз (90°)
-  camera.lowerBetaLimit = Math.PI / 4; // Мин. угол наклона вверх (45°)
+  // camera.upperBetaLimit = Math.PI / 2; // Макс. угол наклона вниз (90°)
+  // camera.lowerBetaLimit = Math.PI / 4; // Мин. угол наклона вверх (45°)
+  
+  
+  
 
-
+  // Закрепление камеры на холсте
+  camera.attachControl(canvas, true);
 
   // Создание источника света
   const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
@@ -60,10 +80,17 @@ var createScene = function () {
   // Позиционирование персонажа
   ball.position = new BABYLON.Vector3(0.5, 0.5, -8.5);
   
-  camera.parent = ball;
-  camera.minZ = 0.01;
-  camera.fov = 0.3;
-  camera.physicsImpostor = new BABYLON.PhysicsImpostor(camera, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 0, restitution: 0 }, scene);
+
+  // Дополнительные настройки камеры
+  
+  // camera.parent = ball;
+  // camera.lockedTarget = ball;  // закрепленни камеры на цели
+  // camera.minZ = 0.01;
+  // camera.fov = 0.3;
+  scene.registerBeforeRender(() => {
+    camera.position = new BABYLON.Vector3(ball.position.x, ball.position.y, ball.position.z - 1);
+    camera.setTarget(ball.position);
+  });
 
   // Создание "земли"
   const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 20, height: 20, }, scene);
