@@ -6,12 +6,6 @@ var engine = new BABYLON.Engine(canvas, true);
 
 //////////////////////////////////////////////////////////////////////////////
 
-// Переменные для управления персонажем
-let movingRight = false,
-  movingLeft = false,
-  movingForward = false,
-  movingBack = false;
-
 // Создание сцены
 var createScene = function () {
 
@@ -19,82 +13,37 @@ var createScene = function () {
   // Создание базового объекта сцены Babylon
   var scene = new BABYLON.Scene(engine);
 
-  // const axes = new BABYLON.AxesViewer(scene, 5); // 2 — размер осей
-  // axes.xAxis.color = BABYLON.Color3.Red();    // X — красный
-  // axes.yAxis.color = BABYLON.Color3.Green(); // Y — зелёный
-  // axes.zAxis.color = BABYLON.Color3.Blue();  // Z — синий
+  // Создание физического движка
+  scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin(true, CANNON));
 
   scene.collisionsEnabled = true; // Включить коллизии для всей сцены
-  scene.gravity = new BABYLON.Vector3(0, -0.98, 0); // Гравитация (если нужно падение)
+  scene.gravity = new BABYLON.Vector3(0, -9.81, 0); // Гравитация
 
   // КАМЕРА
 
-  // ARC ROTATE
-  // var camera = new BABYLON.ArcRotateCamera("camera", Math.PI * 1.5, 1, 30, new BABYLON.Vector3(0, 0, 1));
-  
   // UNIVERSAL
-  const camera = new BABYLON.UniversalCamera("fpsCamera", new BABYLON.Vector3(0.5, 0.5, -8.5), scene);
-  camera.setTarget(BABYLON.Vector3.Zero())
-
-
-  // FOLLOW
-  
-  // const camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0.5, 0.5, -10.5), scene);
-  
-  // camera.radius = -2;   // Высота цели камеры над локальной точкой (центром) цели
-  // camera.heightOffset = 0;   // Целевой поворот камеры вокруг локального начала (центра) цели в плоскости x, y
-  // camera.rotationOffset = 0;   // Ускорение камеры при переходе от текущей позиции к цели
-  // camera.cameraAcceleration = 0.005;   // Скорость, при которой ускорение прекращается
-  // camera.maxCameraSpeed = 5;   // Максимальная скорость камеры
-  // scene.activeCamera = camera; // Активация камеры
-  
-  // Настройки камеры
-  // camera.applyGravity = true;        // Включить гравитацию (если нужно)
-  // camera.checkCollisions = true;     // Включить коллизии
-  // camera.speed = 0.05;                // Скорость движения
-  // camera.angularSensibility = 2000;  // Чувствительность мыши (чем больше, тем медленнее)
-  // camera.keysUp = [87];              // W (вперед)
-  // camera.keysDown = [83];            // S (назад)
-  // camera.keysLeft = [65];            // A (влево)
-  // camera.keysRight = [68];           // D (вправо)
-  // camera.upperBetaLimit = Math.PI / 2; // Макс. угол наклона вниз (90°)
-  // camera.lowerBetaLimit = Math.PI / 4; // Мин. угол наклона вверх (45°)
-  
-  
-  
+  const camera = new BABYLON.UniversalCamera("fpsCamera", new BABYLON.Vector3(-1.2, 1, -19.6), scene);
+  // camera.setTarget(BABYLON.Vector3.Zero());
 
   // Закрепление камеры на холсте
   camera.attachControl(canvas, true);
 
+  camera.applyGravity = true;        // Включить гравитацию
+  camera.checkCollisions = true;     // Включить коллизии
+  camera.collisionRetryCheck = true;
+  camera.speed = 0.1;                // Скорость движения
+  camera.ellipsoid = new BABYLON.Vector3(1.2, 1.1, 1.2);
+  
+  // const cameraAggregate = new BABYLON.PhysicsAggregate(camera, BABYLON.PhysicsShapeType.SPHERE, {mass: 1, restitution: 0.1}, scene);
+  // camera.physicsImpostor = new BABYLON.PhysicsImpostor(camera, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 1 }, scene);
+
+
   // Создание источника света
   const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 
-  // Создание физического движка
-  scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin(true, CANNON));
-
-
-
-  // Создание персонажа (сфера)
-  const ball = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: 0.5, }, scene);
-
-  // Позиционирование персонажа
-  ball.position = new BABYLON.Vector3(0.5, 0.5, -8.5);
-  
-
-  // Дополнительные настройки камеры
-  
-  // camera.parent = ball;
-  // camera.lockedTarget = ball;  // закрепленни камеры на цели
-  // camera.minZ = 0.01;
-  // camera.fov = 0.3;
-  scene.registerBeforeRender(() => {
-    camera.position = new BABYLON.Vector3(ball.position.x, ball.position.y, ball.position.z - 1);
-    camera.setTarget(ball.position);
-  });
-
   // Создание "земли"
-  const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 20, height: 20, }, scene);
-
+  const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 40, height: 40, }, scene);
+  ground.position.y = 0;
 
   // Создание материала для земли
   const groundTexture = new BABYLON.StandardMaterial("groundMat", scene);
@@ -108,63 +57,104 @@ var createScene = function () {
   // Предотвращение столкновений
   ground.checkCollisions = true;
 
+  // Физика земли
+  ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.7 }, scene);
+
+  // BABYLON.ImportMeshAsync("blue.glb").then((result) => {
+  //   var stone = scene.getMeshByName("Object_2");
+  //   stone.position.x = -1;
+  //   stone.position.y = 100;
+  //   stone.position.z = -19;
+  // });
+
+
   // СОЗДАНИЕ ЛАБИРИНТА
   // Создание матрицы поля
   let field = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-    [1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1],
-    [1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1],
-    [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1],
-    [1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1],
-    [1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
-    [1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1],
-    [1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1],
-    [1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1],
-    [1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ].reverse();
 
-
-
-  // Создание материала стен
+  // Создание материала стен и шаров
   let matWal = new BABYLON.StandardMaterial('wall', scene);
+  let matBall = new BABYLON.StandardMaterial('ball', scene);
 
-  // Наложение материала на стены
+  // Наложение материала на стены и шары
   matWal.diffuseTexture = new BABYLON.Texture('floor.png');
+  matBall.emissiveColor = new BABYLON.Color3(1, 1, 0);
+  // matBall.specularColor = new BABYLON.Color3(0.5, 0.6, 0.87);
 
   // Сдвиг в соответствии с размером поля
-  const fieldShift = -9.5;
+  const fieldShift = -19.5;
+
+  let crystal;
 
   // Цикл, создающий кубы по матрице
   for (let i = 0; i < field.length; i++) {
     for (let j = 0; j < field[0].length; j++) {
-      if (field[j][i] == 1) {
-
-        let box = new BABYLON.MeshBuilder.CreateBox(`field[${j}:${i}]`, { size: 1, height: 1.5 }, scene);
-        box.position.x = i + fieldShift;
-        box.position.z = j + fieldShift;
-        box.position.y = 0.75;
-        box.material = matWal;
-        box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 0, restitution: 0 }, scene);
-        box.checkCollisions = true;
+      switch (field[j][i]) {
+        case 1:
+          let box = new BABYLON.MeshBuilder.CreateBox(`field[${j}:${i}]`, { size: 1, height: 4 }, scene);
+          box.position.x = i + fieldShift;
+          box.position.z = j + fieldShift;
+          box.position.y = 2;
+          box.material = matWal;
+          box.checkCollisions = true;
+          box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.7 }, scene);
+          break;
+        case 2: let ball = new BABYLON.MeshBuilder.CreateSphere(`ball[${j}:${i}]`, { diameter: 0.4 }, scene);
+          ball.position = new BABYLON.Vector3(i + fieldShift, 1, j + fieldShift);
+          ball.physicsImpostor = new BABYLON.PhysicsImpostor(ball, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 1 }, scene);
+          ball.material = matBall;
+          break;
+        
+        // case 3: BABYLON.ImportMeshAsync('blue.glb', scene).then((result) => {
+        //   crystal = scene.getMeshByName("Object_2");
+        //   crystal.position = new BABYLON.Vector3(i + fieldShift, 1, j + fieldShift);});
+        //   break;
       };
     };
   };
 
-  // ФИЗИКА ОБЪЕКТОВ
-  // Создание физических импосторов для объектов
-  ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0 }, scene);
-  ball.physicsImpostor = new BABYLON.PhysicsImpostor(ball, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0 }, scene);
-
+  
 
   // СОЗДАНИЕ НЕБА
   // Создаем сферу
@@ -183,59 +173,8 @@ var createScene = function () {
   // Наложение материала на небесную сферу
   skybox.material = skyboxMaterial;
 
-
   // Включаем инспектор в совмещенном режиме
-  scene.debugLayer.show({ embedMode: true, });
-
-  // УПРАВЛЕНИЕ ПЕРСОНАЖЕМ
-
-  // Функция обновления позиции
-  function updatePosition() {
-    let speed = 0.05;
-    let newPos = ball.position;
-    if (movingForward) {
-      newPos.z += speed;
-    }
-    if (movingBack) {
-      newPos.z -= speed;
-    }
-    if (movingRight) {
-      newPos.x += speed;
-    }
-    if (movingLeft) {
-      newPos.x -= speed;
-    }
-  }
-
-  // Обработчики событий нажатия и отпускания клавиш
-  window.addEventListener('keydown', keydown);
-  window.addEventListener('keyup', keyup);
-
-  // Функция обновления переменных при нажатии клавиш
-  function keydown(event) {
-    let newPos = ball.position.clone();
-    // Отображение кода события в консоли
-    console.log(event.code)
-
-    switch (event.code) {
-      case 'KeyW': movingForward = true; movingBack = false; break;
-      case 'KeyA': movingLeft = true; movingRight = false; break;
-      case 'KeyS': movingBack = true; movingForward = false;; break;
-      case 'KeyD': movingRight = true; movingLeft = false; break;
-    }
-  }
-
-  // Функция обновления переменных при отпускании клавиш
-  function keyup(event) {
-    switch (event.code) {
-      case 'KeyW': movingForward = false; break;
-      case 'KeyA': movingLeft = false; break;
-      case 'KeyS': movingBack = false; break;
-      case 'KeyD': movingRight = false; break;
-    }
-  }
-  // Наблюдение за выполнением функции обновления позиции
-  scene.onBeforeRenderObservable.add(() => { updatePosition() });
+  scene.debugLayer.show({ embedMode: true, showCollisions: true });
 
   return scene;
 };

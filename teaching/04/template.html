@@ -74,6 +74,13 @@
           car.position.y = 0.2;
         });
 
+        BABYLON.ImportMeshAsync("blue3.glb").then((result) => {
+    var stone = scene.getMeshByName("Object_2");
+    stone.position.y = 3;
+    stone.position.x = 0;
+    stone.position.z = 0;
+    
+  });
         // BABYLON.ImportMeshAsync(
         //   "car.glb",
         //   scene
