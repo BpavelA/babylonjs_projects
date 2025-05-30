@@ -305,7 +305,7 @@ function makeUI() {
   uiTexture.parseSerializedObject(ui);
   let root = uiTexture.getChildren()[0];
   appleText = root.getDescendants(false, function (node) { return node.name === 'appleTextblock'; })[0];
-  bananaText = root.getDescendants(falseq, function (node) { return node.name === 'babanaTextblock'; })[0];
+  bananaText = root.getDescendants(false, function (node) { return node.name === 'babanaTextblock'; })[0];
   peachText = root.getDescendants(false, function (node) { return node.name === 'peachTextblock'; })[0];
   cherryText = root.getDescendants(false, function (node) { return node.name === 'cherryTextblock'; })[0];
 }
