@@ -129,11 +129,11 @@ var createScene = function () {
           box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.7 }, scene);
           break;
 
-        case 2: let ball = new BABYLON.MeshBuilder.CreateSphere(`ball[${j}:${i}]`, { diameter: 0.4 }, scene);
-          ball.position = new BABYLON.Vector3(i + fieldShift, 1, j + fieldShift);
-          ball.physicsImpostor = new BABYLON.PhysicsImpostor(ball, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 1 }, scene);
-          ball.material = matBall;
-          break;
+        // case 2: let ball = new BABYLON.MeshBuilder.CreateSphere(`ball[${j}:${i}]`, { diameter: 0.4 }, scene);
+        //   ball.position = new BABYLON.Vector3(i + fieldShift, 1, j + fieldShift);
+        //   ball.physicsImpostor = new BABYLON.PhysicsImpostor(ball, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 1 }, scene);
+        //   ball.material = matBall;
+        //   break;
 
         case 3: BABYLON.ImportMeshAsync("models/blue.glb", scene).then((result) => {
           let crystal = result.meshes[0];
@@ -201,7 +201,14 @@ var createScene = function () {
     // if (distance < 2) { wall.setEnabled(false) };
 
     allMeshes.forEach(mesh => {
-      if (mesh.name == 'Object_2') {
+      if (mesh.name == '__root__') {
+
+        // mesh.actionManager = new BABYLON.ActionManager(scene);
+
+        // mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
+        //     { trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
+        //       parameter: camera}, () => {mesh.setEnabled(false);}));
+
         const boundingInfo = mesh.getBoundingInfo();
         if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
           // mesh.dispose();
@@ -212,13 +219,15 @@ var createScene = function () {
 
 
 
-    crystals.forEach(crystal => {
-      const boundingInfo = crystal.getBoundingInfo();
-      if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
-        // crystal.dispose();
-        crystal.setEnabled(false);
-      }
-    });
+    // crystals.forEach(crystal => {
+    //   const boundingInfo = crystal.getBoundingInfo();
+    //   if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
+    //     // crystal.dispose();
+    //     crystal.setEnabled(false);
+    //   }
+    // });
+
+
   });
 
 
