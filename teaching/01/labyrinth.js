@@ -138,8 +138,10 @@ var createScene = function () {
         case 3: BABYLON.ImportMeshAsync("models/blue.glb", scene).then((result) => {
           let crystal = result.meshes[0];
           crystal.position = new BABYLON.Vector3(i + fieldShift, 0.3, j + fieldShift);
-          crystal.name = `blue[${j}:${i}]`;
+          crystal.scaling = new BABYLON.Vector3(3, 3, 3);
+          // crystal.name = `blue[${j}:${i}]`;
           crystal.getChildMeshes().forEach(child => {
+            child.ellipsoid = new BABYLON.Vector3(3, 3, 3);
             child.checkCollisions = true;
           });
           crystals.push(crystal);
@@ -183,29 +185,41 @@ var createScene = function () {
 
   const allMeshes = scene.meshes;
 
-  console.log(allMeshes);
+  // console.log(allMeshes);
 
-  allMeshes.forEach(mesh => {
+  // allMeshes.forEach(mesh => {
 
-    if (mesh.name == 'Object_2') {
-      mesh.checkCollisions = true;
-    }
-  });
-
-  // scene.registerBeforeRender(() => {
-
-  //   // const wall = scene.getMeshByName('field[0:10]');
-  //   // const distance = BABYLON.Vector3.Distance(camera.position, wall.position);
-  //   // if (distance < 2) { wall.setEnabled(false) };
-
-
-  //   allMeshes.forEach(mesh => {
-
-  //     if (mesh.name == 'Object_2' && mesh.intersectsMesh(camera, false)) {
-  //       mesh.dispose();
-  //     }
-  //   });
+  //   if (mesh.name == 'Object_2') {
+  //     mesh.checkCollisions = true;
+  //   }
   // });
+
+  scene.registerBeforeRender(() => {
+
+    // const wall = scene.getMeshByName('field[0:10]');
+    // const distance = BABYLON.Vector3.Distance(camera.position, wall.position);
+    // if (distance < 2) { wall.setEnabled(false) };
+
+    allMeshes.forEach(mesh => {
+      if (mesh.name == 'Object_2') {
+        const boundingInfo = mesh.getBoundingInfo();
+        if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
+          // mesh.dispose();
+          mesh.setEnabled(false);
+        }
+      }
+    });
+
+
+
+    crystals.forEach(crystal => {
+      const boundingInfo = crystal.getBoundingInfo();
+      if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
+        // crystal.dispose();
+        crystal.setEnabled(false);
+      }
+    });
+  });
 
 
   // Включаем инспектор в совмещенном режиме
