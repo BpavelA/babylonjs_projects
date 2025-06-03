@@ -182,15 +182,44 @@ var createScene = function () {
   // Наложение материала на небесную сферу
   skybox.material = skyboxMaterial;
 
+  // const allMeshes = scene.meshes;
+
+  // console.log(allMeshes);
+
+  // allMeshes.forEach(mesh => {
+
+  //   if (mesh.name == 'Object_2') {
+  //     mesh.checkCollisions = true;
+  //   }
+  // });
+
   scene.registerBeforeRender(() => {
 
+    // const wall = scene.getMeshByName('field[0:10]');
+    // const distance = BABYLON.Vector3.Distance(camera.position, wall.position);
+    // if (distance < 2) { wall.setEnabled(false) };
+
+    allMeshes.forEach(mesh => {
+      if (mesh.name == 'Object_2') {
+        const boundingInfo = mesh.getBoundingInfo();
+        if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
+          // mesh.dispose();
+          mesh.setEnabled(false);
+        }
+      }
+    });
+
+
+
     crystals.forEach(crystal => {
-      const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
-      if (distance < 3) {
+      const boundingInfo = crystal.getBoundingInfo();
+      if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
+        // crystal.dispose();
         crystal.setEnabled(false);
       }
     });
   });
+
 
   // Включаем инспектор в совмещенном режиме
   scene.debugLayer.show({ embedMode: true, showCollisions: true });
