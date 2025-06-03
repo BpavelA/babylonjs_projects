@@ -20,7 +20,6 @@ var createScene = function () {
   scene.gravity = new BABYLON.Vector3(0, -9.81, 0); // Гравитация
 
   // КАМЕРА
-
   // UNIVERSAL
   const camera = new BABYLON.UniversalCamera("fpsCamera", new BABYLON.Vector3(-1.2, 1, -19.6), scene);
   // camera.setTarget(BABYLON.Vector3.Zero());
@@ -183,7 +182,7 @@ var createScene = function () {
   // Наложение материала на небесную сферу
   skybox.material = skyboxMaterial;
 
-  const allMeshes = scene.meshes;
+  // const allMeshes = scene.meshes;
 
   // console.log(allMeshes);
 
@@ -200,21 +199,20 @@ var createScene = function () {
     // const distance = BABYLON.Vector3.Distance(camera.position, wall.position);
     // if (distance < 2) { wall.setEnabled(false) };
 
-    allMeshes.forEach(mesh => {
-      if (mesh.name == 'Object_2') {
-        const boundingInfo = mesh.getBoundingInfo();
-        if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
-          // mesh.dispose();
-          mesh.setEnabled(false);
-        }
-      }
-    });
-
+    // allMeshes.forEach(mesh => {
+    //   if (mesh.name == 'Object_2') {
+    //     const boundingInfo = mesh.getBoundingInfo();
+    //     if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
+    //       // mesh.dispose();
+    //       mesh.setEnabled(false);
+    //     }
+    //   }
+    // });
 
 
     crystals.forEach(crystal => {
-      const boundingInfo = crystal.getBoundingInfo();
-      if (boundingInfo.boundingBox.intersectsPoint(camera.globalPosition)) {
+      const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
+      if (distance < 3) {
         // crystal.dispose();
         crystal.setEnabled(false);
       }
