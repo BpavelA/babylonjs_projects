@@ -6,9 +6,16 @@ var engine = new BABYLON.Engine(canvas, true);
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+
+
 // Создание сцены
 var createScene = function () {
 
+  // Создаем счетчики кристаллов
+  let blueCounter = 0,
+    greenCounter = 0,
+    magicCounter = 0;
 
   // Создание базового объекта сцены Babylon
   var scene = new BABYLON.Scene(engine);
@@ -22,7 +29,6 @@ var createScene = function () {
   // КАМЕРА
   // UNIVERSAL
   const camera = new BABYLON.UniversalCamera("fpsCamera", new BABYLON.Vector3(-1.2, 1, -19.6), scene);
-  // camera.setTarget(BABYLON.Vector3.Zero());
 
   // Закрепление камеры на холсте
   camera.attachControl(canvas, true);
@@ -100,21 +106,31 @@ var createScene = function () {
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ].reverse();
 
-  // Создание материала стен и шаров
+  // Создание материала стен
   let matWal = new BABYLON.StandardMaterial('wall', scene);
-  let matBall = new BABYLON.StandardMaterial('ball', scene);
 
-  // Наложение материала на стены и шары
+  // Наложение материала на стены
   matWal.diffuseTexture = new BABYLON.Texture('floor.png');
-  matBall.emissiveColor = new BABYLON.Color3(1, 1, 0);
-  // matBall.specularColor = new BABYLON.Color3(0.5, 0.6, 0.87);
 
   // Сдвиг в соответствии с размером поля
   const fieldShift = -19.5;
 
   let crystals = [];
 
-  // Цикл, создающий кубы по матрице
+  function makeCrystals(type, result, i, j) {
+    let crystal = result.meshes[0];
+    crystal.position = new BABYLON.Vector3(i + fieldShift, 0, j + fieldShift);
+    crystal.scaling = new BABYLON.Vector3(1.5, 1.5, 1.5);
+    crystal.name = type;
+    crystal.getChildMeshes().forEach(child => {
+      child.ellipsoid = new BABYLON.Vector3(2, 2, 2);
+      child.checkCollisions = true;
+    });
+    crystals.push(crystal);
+  };
+
+
+  // Цикл, создающий кубы (стены лабиринта) и кристаллы в матрице
   for (let i = 0; i < field.length; i++) {
     for (let j = 0; j < field[0].length; j++) {
       switch (field[j][i]) {
@@ -128,42 +144,24 @@ var createScene = function () {
           box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.7 }, scene);
           break;
 
-        // case 2: let ball = new BABYLON.MeshBuilder.CreateSphere(`ball[${j}:${i}]`, { diameter: 0.4 }, scene);
-        //   ball.position = new BABYLON.Vector3(i + fieldShift, 1, j + fieldShift);
-        //   ball.physicsImpostor = new BABYLON.PhysicsImpostor(ball, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 1 }, scene);
-        //   ball.material = matBall;
-        //   break;
-
         case 3: BABYLON.ImportMeshAsync("models/blue.glb", scene).then((result) => {
-          let crystal = result.meshes[0];
-          crystal.position = new BABYLON.Vector3(i + fieldShift, 0.3, j + fieldShift);
-          crystal.scaling = new BABYLON.Vector3(3, 3, 3);
-          // crystal.name = `blue[${j}:${i}]`;
-          crystal.getChildMeshes().forEach(child => {
-            child.ellipsoid = new BABYLON.Vector3(3, 3, 3);
-            child.checkCollisions = true;
-          });
-          crystals.push(crystal);
+          makeCrystals('blue', result, i, j)
         });
           break;
 
         case 4: BABYLON.ImportMeshAsync("models/gem.glb", scene).then((result) => {
-          let crystal = result.meshes[0];
-          crystal.position = new BABYLON.Vector3(i + fieldShift, 0.3, j + fieldShift);
+          makeCrystals('green', result, i, j)
         });
           break;
 
         case 5: BABYLON.ImportMeshAsync("models/magic.glb", scene).then((result) => {
-          let crystal = result.meshes[0];
-          crystal.position = new BABYLON.Vector3(i + fieldShift, 0.3, j + fieldShift);
+          makeCrystals('magic', result, i, j)
         });
 
           break;
       };
     };
   };
-
-  console.log(crystals);
 
   // СОЗДАНИЕ НЕБА
   // Создаем сферу
@@ -182,25 +180,55 @@ var createScene = function () {
   // Наложение материала на небесную сферу
   skybox.material = skyboxMaterial;
 
+  // Отлавливаем столкновение камеры с кристаллами и обновляем счетчики
   scene.registerBeforeRender(() => {
-
     crystals.forEach(crystal => {
       const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
       if (distance < 3) {
         crystal.setEnabled(false);
+        blueCounter += 5;
+        // console.log(blueCounter);
+        //   if (crystal.setEnabled(false)) {
+        //   switch (crystal.name) {
+        //     case 'blue': blueCounter++;
+        //       console.log(blueCounter);
+        //       break;
+        //     case 'green': greenCounter++;
+        //       break;
+        //     case 'magic': magicCounter++;
+        //       break;
+        //   }
+        // }  
       }
     });
+    // console.log(blueCounter);
   });
 
   // Включаем инспектор в совмещенном режиме
   scene.debugLayer.show({ embedMode: true, showCollisions: true });
+
+  // Создание элементов пользовательского интерфейса
+  let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+  let rect = new BABYLON.GUI.Rectangle();
+  rect.name = 'rect';
+  rect.width = '250px';
+  rect.height = '250px';
+  rect.background = rect.color = new BABYLON.Color4(0.5, 0.5, 0.5, 0.5).toHexString();
+  advancedTexture.addControl(rect);
+
   return scene;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
+
 // Вызов функции createScene, которая создает сцену
 const scene = createScene();
+
+
+
+// function makeUI() {
+// };
 
 // Создания цикла для постоянной отрисовки сцены
 engine.runRenderLoop(function () {
@@ -208,5 +236,7 @@ engine.runRenderLoop(function () {
 });
 
 
+
 // Изменение размера сцены при изменении размера экрана
 window.addEventListener("resize", function () { engine.resize(); });
+
