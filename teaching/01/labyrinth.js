@@ -1,3 +1,6 @@
+// Импорт файла json с нанстройками ui
+const ui = await(await fetch('./guiTexture.json')).json();
+
 // Получение элемента canvas
 let canvas = document.getElementById("renderCanvas");
 
@@ -7,15 +10,24 @@ var engine = new BABYLON.Engine(canvas, true);
 //////////////////////////////////////////////////////////////////////////////
 
 
+// Создаем счетчики кристаллов
+// let blueCounter = 0,
+//   greenCounter = 0,
+//   magicCounter = 0;
+
+// let blueText;
+// let greenText;
+// let magicText;
+
+// blueText.text = blueCounter;
+// greenText.text = greenCounter;
+// magicText.text = magicCounter;
 
 
 // Создание сцены
 var createScene = function () {
 
-  // Создаем счетчики кристаллов
-  let blueCounter = 0,
-    greenCounter = 0,
-    magicCounter = 0;
+
 
   // Создание базового объекта сцены Babylon
   var scene = new BABYLON.Scene(engine);
@@ -50,7 +62,7 @@ var createScene = function () {
   const groundTexture = new BABYLON.StandardMaterial("groundMat", scene);
 
   // Задание материалу текстуры
-  groundTexture.diffuseTexture = new BABYLON.Texture("grass.png");
+  groundTexture.diffuseTexture = new BABYLON.Texture("img/grass.png");
 
   // Наложение материала на землю
   ground.material = groundTexture;
@@ -110,7 +122,7 @@ var createScene = function () {
   let matWal = new BABYLON.StandardMaterial('wall', scene);
 
   // Наложение материала на стены
-  matWal.diffuseTexture = new BABYLON.Texture('floor.png');
+  matWal.diffuseTexture = new BABYLON.Texture('img/floor.png');
 
   // Сдвиг в соответствии с размером поля
   const fieldShift = -19.5;
@@ -171,7 +183,7 @@ var createScene = function () {
   // Отключение отсечения "задних" граней сферы (чтобы текстура была видна и изнутри)
   skyboxMaterial.backFaceCulling = false;
   // Текстура будет проецироваться на сферу как окружение.
-  skyboxMaterial.reflectionTexture = new BABYLON.Texture("skybox2.jpg", scene, true, false);
+  skyboxMaterial.reflectionTexture = new BABYLON.Texture("img/skybox2.jpg", scene, true, false);
   // Проецирует панорамную (equirectangular) текстуру на сферу, имитируя 360° окружение.
   skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.EQUIRECTANGULAR_MODE;
   // Отключение рассеянного и бликового цвета
@@ -208,13 +220,42 @@ var createScene = function () {
   scene.debugLayer.show({ embedMode: true, showCollisions: true });
 
   // Создание элементов пользовательского интерфейса
-  let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-  let rect = new BABYLON.GUI.Rectangle();
-  rect.name = 'rect';
-  rect.width = '250px';
-  rect.height = '250px';
-  rect.background = rect.color = new BABYLON.Color4(0.5, 0.5, 0.5, 0.5).toHexString();
-  advancedTexture.addControl(rect);
+
+  // 
+  let uiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+  uiTexture.parseSerializedObject(ui);
+  // blueText = root.getDescendants(false, function (node) { return node.name === 'blueText'; })[0];
+  // greenText = root.getDescendants(false, function (node) { return node.name === 'greenText'; })[0];
+  // magicText = root.getDescendants(false, function (node) { return node.name === 'magicText'; })[0];
+
+  // let rect = new BABYLON.GUI.Rectangle();
+  // rect.name = 'rect';
+  // rect.width = '250px';
+  // rect.height = '500px';
+  // rect.background = rect.color = new BABYLON.Color4(0.5, 0.5, 0.5, 0.5).toHexString();
+  // rect.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+  // rect.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+  // advancedTexture.addControl(rect);
+
+  // let stackpanel = new BABYLON.GUI.StackPanel();
+  // stackpanel.name = 'stackpanel';
+  // stackpanel.width = '220px';
+  // // stackpanel.height = '480px';
+  // stackpanel.fontSize = '14px';
+  // stackpanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+  // stackpanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+  // rect.addControl(stackpanel);
+
+  // let blueStoneIco = new BABYLON.GUI.Image('blueStoneIco', 'img/blue.png');
+  // blueStoneIco.width = '50px';
+  // blueStoneIco.height = '50px';
+  // blueStoneIco.left = '10px';
+  // blueStoneIco.top = '10px';
+  // blueStoneIco.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+  // blueStoneIco.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+  // rect.addControl(blueStoneIco);
+
+
 
   return scene;
 };
