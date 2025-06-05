@@ -11,17 +11,13 @@ var engine = new BABYLON.Engine(canvas, true);
 
 
 // Создаем счетчики кристаллов
-// let blueCounter = 0,
-//   greenCounter = 0,
-//   magicCounter = 0;
+let blueCounter = 0,
+  greenCounter = 0,
+  magicCounter = 0;
 
-// let blueText;
-// let greenText;
-// let magicText;
-
-// blueText.text = blueCounter;
-// greenText.text = greenCounter;
-// magicText.text = magicCounter;
+let blueText;
+let greenText;
+let magicText;
 
 
 // Создание сцены
@@ -196,37 +192,38 @@ var createScene = function () {
   scene.registerBeforeRender(() => {
     crystals.forEach(crystal => {
       const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
-      if (distance < 3) {
+      if (distance < 3 && crystal.name != 'fetched') {
+        
+        onTouchCrystal(crystal.name);
         crystal.setEnabled(false);
-        blueCounter += 5;
-        // console.log(blueCounter);
-        //   if (crystal.setEnabled(false)) {
-        //   switch (crystal.name) {
-        //     case 'blue': blueCounter++;
-        //       console.log(blueCounter);
-        //       break;
-        //     case 'green': greenCounter++;
-        //       break;
-        //     case 'magic': magicCounter++;
-        //       break;
-        //   }
-        // }  
-      }
+        crystal.name = 'fetched';
+      };
     });
-    // console.log(blueCounter);
+
   });
+
+
 
   // Включаем инспектор в совмещенном режиме
   scene.debugLayer.show({ embedMode: true, showCollisions: true });
 
-  // Создание элементов пользовательского интерфейса
-
-  // 
+  // Создание элементов пользовательского интерфейса и получение значения полей счетчика
   let uiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
   uiTexture.parseSerializedObject(ui);
-  // blueText = root.getDescendants(false, function (node) { return node.name === 'blueText'; })[0];
-  // greenText = root.getDescendants(false, function (node) { return node.name === 'greenText'; })[0];
-  // magicText = root.getDescendants(false, function (node) { return node.name === 'magicText'; })[0];
+  let root = uiTexture.getChildren()[0];
+  blueText = root.getDescendants(false, function (node) { return node.name === 'blueText'; })[0];
+  greenText = root.getDescendants(false, function (node) { return node.name === 'greenText'; })[0];
+  magicText = root.getDescendants(false, function (node) { return node.name === 'magicText'; })[0];
+
+  // Функция изменения количества собранных кристаллов
+  function onTouchCrystal(crystalName) {
+    switch (crystalName) {
+      case 'blue': blueText.text = ++blueCounter; break;
+      case 'green': greenText.text = ++greenCounter; break;
+      case 'magic': magicText.text = ++magicCounter; break;
+    };
+  };
 
   // let rect = new BABYLON.GUI.Rectangle();
   // rect.name = 'rect';
@@ -255,28 +252,18 @@ var createScene = function () {
   // blueStoneIco.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
   // rect.addControl(blueStoneIco);
 
-
-
   return scene;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
-
 // Вызов функции createScene, которая создает сцену
 const scene = createScene();
-
-
-
-// function makeUI() {
-// };
 
 // Создания цикла для постоянной отрисовки сцены
 engine.runRenderLoop(function () {
   scene.render();
 });
-
-
 
 // Изменение размера сцены при изменении размера экрана
 window.addEventListener("resize", function () { engine.resize(); });
