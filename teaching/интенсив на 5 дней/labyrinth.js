@@ -179,7 +179,7 @@ var createScene = function () {
   // Отключение отсечения "задних" граней сферы (чтобы текстура была видна и изнутри)
   skyboxMaterial.backFaceCulling = false;
   // Текстура будет проецироваться на сферу как окружение.
-  skyboxMaterial.reflectionTexture = new BABYLON.Texture("img/skybox2.jpg", scene, true, false);
+  skyboxMaterial.reflectionTexture = new BABYLON.Texture("img/nightsky.jpg", scene, true, false);
   // Проецирует панорамную (equirectangular) текстуру на сферу, имитируя 360° окружение.
   skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.EQUIRECTANGULAR_MODE;
   // Отключение рассеянного и бликового цвета
