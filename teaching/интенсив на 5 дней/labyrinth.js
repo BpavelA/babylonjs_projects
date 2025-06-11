@@ -48,7 +48,25 @@ var createScene = function () {
   camera.ellipsoid = new BABYLON.Vector3(1.2, 1.1, 1.2);
 
   // Создание источника света
-  const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+  
+  // const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+  const light = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-40, 30, 20), scene);
+
+  // const light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(0, -1, 0), scene);
+
+  // const light = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(-Math.cos(Math.PI / 6), 20, -Math.sin(Math.PI / 6)), new BABYLON.Vector3(0, -1, 0), Math.PI / 2, 1.5, scene);
+
+  let mond = new BABYLON.MeshBuilder.CreateSphere('mond', { diameter: 2 }, scene);
+  mond.position = light.position;
+
+  // Изменяем интенсивность света 
+  light.intensity = 1;
+
+  // Добавляем свету цвет
+  // light.diffuse = new BABYLON.Color3(1, 0, 0);
+	// light.specular = new BABYLON.Color3(0, 1, 0);
+	// light.groundColor = new BABYLON.Color3(0, 1, 0);
 
   // Создание "земли"
   const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 40, height: 40, }, scene);
@@ -62,6 +80,7 @@ var createScene = function () {
 
   // Наложение материала на землю
   ground.material = groundTexture;
+  
 
   // Предотвращение столкновений
   ground.checkCollisions = true;
