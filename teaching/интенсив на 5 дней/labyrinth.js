@@ -33,6 +33,7 @@ var createScene = function () {
 
   scene.collisionsEnabled = true; // Включить коллизии для всей сцены
   scene.gravity = new BABYLON.Vector3(0, -9.81, 0); // Гравитация
+  // scene.ambientColor = new BABYLON.Color3(1, 1, 1);
 
   // КАМЕРА
   // UNIVERSAL
@@ -48,25 +49,39 @@ var createScene = function () {
   camera.ellipsoid = new BABYLON.Vector3(1.2, 1.1, 1.2);
 
   // Создание источника света
-  
-  // const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 
-  const light = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-40, 30, 20), scene);
+  const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+  const light2 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-40, 30, 20), scene);
 
   // const light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(0, -1, 0), scene);
 
   // const light = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(-Math.cos(Math.PI / 6), 20, -Math.sin(Math.PI / 6)), new BABYLON.Vector3(0, -1, 0), Math.PI / 2, 1.5, scene);
 
+  // Создаем в небе луну
   let mond = new BABYLON.MeshBuilder.CreateSphere('mond', { diameter: 2 }, scene);
-  mond.position = light.position;
+  mond.position = light2.position;
+  mond.infiniteDistance = true;
+  let mondMat = new BABYLON.StandardMaterial('mondmat', scene);
+  mondMat.emissiveColor = new BABYLON.Color3(1, 1, 0.522);
+  mond.material = mondMat;
+  
+  // Изменяем интенсивность света
+  light.intensity = 0.3;
+  light2.intensity = 0.5;
 
-  // Изменяем интенсивность света 
-  light.intensity = 1;
+
 
   // Добавляем свету цвет
   // light.diffuse = new BABYLON.Color3(1, 0, 0);
-	// light.specular = new BABYLON.Color3(0, 1, 0);
-	// light.groundColor = new BABYLON.Color3(0, 1, 0);
+  // light.specular = new BABYLON.Color3(0, 1, 0);
+  // light.groundColor = new BABYLON.Color3(0, 1, 0);
+
+  // Инициализируем генератор теней
+  const shadowGenerator = new BABYLON.ShadowGenerator(1024, light2);
+  shadowGenerator.usePoissonSampling = true;
+  shadowGenerator.useBlurExponentialShadowMap = true;
+  shadowGenerator.blurKernel = 32;
 
   // Создание "земли"
   const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 40, height: 40, }, scene);
@@ -80,10 +95,13 @@ var createScene = function () {
 
   // Наложение материала на землю
   ground.material = groundTexture;
-  
+
 
   // Предотвращение столкновений
   ground.checkCollisions = true;
+
+  // Земля получает тени 
+  ground.receiveShadows = true;
 
   // Физика земли
   ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.7 }, scene);
@@ -152,6 +170,7 @@ var createScene = function () {
     crystal.getChildMeshes().forEach(child => {
       child.ellipsoid = new BABYLON.Vector3(2, 2, 2);
       child.checkCollisions = true;
+      shadowGenerator.addShadowCaster(child, true);
     });
     crystals.push(crystal);
   };
@@ -169,6 +188,8 @@ var createScene = function () {
           box.material = matWal;
           box.checkCollisions = true;
           box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.7 }, scene);
+          shadowGenerator.addShadowCaster(box, true);
+          // box.ambientColor = new BABYLON.Color3(1, 1, 1);
           break;
 
         case 3: BABYLON.ImportMeshAsync("models/blue.glb", scene).then((result) => {
@@ -189,6 +210,12 @@ var createScene = function () {
       };
     };
   };
+
+
+
+
+
+
 
   // СОЗДАНИЕ НЕБА
   // Создаем сферу
@@ -212,7 +239,7 @@ var createScene = function () {
     crystals.forEach(crystal => {
       const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
       if (distance < 3 && crystal.name != 'fetched') {
-        
+
         onTouchCrystal(crystal.name);
         crystal.setEnabled(false);
         crystal.name = 'fetched';
