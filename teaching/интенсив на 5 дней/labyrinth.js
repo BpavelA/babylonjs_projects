@@ -83,6 +83,18 @@ var createScene = function () {
   shadowGenerator.useBlurExponentialShadowMap = true;
   shadowGenerator.blurKernel = 32;
 
+  // Добавляем звуки
+  // Создаем асинхронную функцию
+  (async () => {
+    const audioEngine = await BABYLON.CreateAudioEngineAsync();
+    const ambientSound = await BABYLON.CreateSoundAsync("ambientSound", "sounds/ambient_sound.mp3", { loop: true });
+
+    // Ждем пока не будет разблокирован движок
+    await audioEngine.unlockAsync();
+
+    // ambientSound.play();
+  })();
+
   // Создание "земли"
   const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 40, height: 40, }, scene);
   ground.position.y = 0;
@@ -251,7 +263,7 @@ var createScene = function () {
 
 
   // Включаем инспектор в совмещенном режиме
-  scene.debugLayer.show({ embedMode: true, showCollisions: true });
+  // scene.debugLayer.show({ embedMode: true, showCollisions: true });
 
   // Создание элементов пользовательского интерфейса и получение значения полей счетчика
   let uiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -261,6 +273,22 @@ var createScene = function () {
   blueText = root.getDescendants(false, function (node) { return node.name === 'blueText'; })[0];
   greenText = root.getDescendants(false, function (node) { return node.name === 'greenText'; })[0];
   magicText = root.getDescendants(false, function (node) { return node.name === 'magicText'; })[0];
+
+  let iconPath = "img/speaker.png";
+  let iconOff = "img/no_sound.png";
+
+  let soundButton = BABYLON.GUI.Button.CreateImageOnlyButton("soundIcon", iconPath);
+  soundButton.height = "48px";
+  soundButton.width = "48px";
+  soundButton.top = "-10px";
+  soundButton.left = "10px"; 
+  soundButton.color = new BABYLON.Color4(0.0, 0.0, 0.0, 0.0).toHexString();
+  soundButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+  soundButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+  // soundButton.addEventListener("")
+  uiTexture.addControl(soundButton);
+
+  
 
   // Функция изменения количества собранных кристаллов
   function onTouchCrystal(crystalName) {
