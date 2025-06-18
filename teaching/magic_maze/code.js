@@ -69,6 +69,12 @@ let createScene = function () {
  // Включаем инспектор в совмещенном режиме
  scene.debugLayer.show({ embedMode: true, showCollisions: true });
  
+ // Включаем и настраиваем туман
+
+ scene.fogMode = BABYLON.Scene.FOGMODE_EXP2 = 2;    // Экспоненциальный квадратичный туман
+ scene.fogDensity = 0.1;// Настраиваем интенсивность тумана
+ scene.fogColor = new BABYLON.Color3(0.1, 0.2, 0.1); // Настраиваем цвет тумана
+
  return scene;
 };
 
