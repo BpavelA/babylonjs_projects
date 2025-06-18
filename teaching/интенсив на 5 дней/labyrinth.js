@@ -65,7 +65,7 @@ var createScene = function () {
   let mondMat = new BABYLON.StandardMaterial('mondmat', scene);
   mondMat.emissiveColor = new BABYLON.Color3(1, 1, 0.522);
   mond.material = mondMat;
-  
+
   // Изменяем интенсивность света
   light.intensity = 0.3;
   light2.intensity = 0.5;
@@ -83,17 +83,13 @@ var createScene = function () {
   shadowGenerator.useBlurExponentialShadowMap = true;
   shadowGenerator.blurKernel = 32;
 
-  // Добавляем звуки
-  // Создаем асинхронную функцию
-  (async () => {
-    const audioEngine = await BABYLON.CreateAudioEngineAsync();
-    const ambientSound = await BABYLON.CreateSoundAsync("ambientSound", "sounds/ambient_sound.mp3", { loop: true });
+  // Добавляем фоновый звук
 
-    // Ждем пока не будет разблокирован движок
-    await audioEngine.unlockAsync();
-
-    // ambientSound.play();
-  })();
+  const ambientSound = new Audio("sounds/ambient_sound.mp3");
+  const fetchedCrystal = new Audio("sounds/fetched_crystal.wav");
+  ambientSound.autoplay = true;
+  ambientSound.loop = true;
+  
 
   // Создание "земли"
   const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 40, height: 40, }, scene);
@@ -246,18 +242,24 @@ var createScene = function () {
   // Наложение материала на небесную сферу
   skybox.material = skyboxMaterial;
 
+  // Включаем и настраиваем туман
+
+  scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+  scene.fogColor = new BABYLON.Color3(0.1, 0.2, 0.1);
+
   // Отлавливаем столкновение камеры с кристаллами и обновляем счетчики
   scene.registerBeforeRender(() => {
     crystals.forEach(crystal => {
       const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
       if (distance < 3 && crystal.name != 'fetched') {
 
+        fetchedCrystal.play(); 
         onTouchCrystal(crystal.name);
         crystal.setEnabled(false);
         crystal.name = 'fetched';
       };
     });
-
+    scene.fogDensity = 0.1 + Math.sin(Date.now() * 0.001) * 0.005;
   });
 
 
@@ -275,18 +277,36 @@ var createScene = function () {
   magicText = root.getDescendants(false, function (node) { return node.name === 'magicText'; })[0];
 
   let iconPath = "img/speaker.png";
-  let iconOff = "img/no_sound.png";
+  let flagSoundOn = true;
 
   let soundButton = BABYLON.GUI.Button.CreateImageOnlyButton("soundIcon", iconPath);
   soundButton.height = "48px";
   soundButton.width = "48px";
   soundButton.top = "-10px";
-  soundButton.left = "10px"; 
+  soundButton.left = "10px";
   soundButton.color = new BABYLON.Color4(0.0, 0.0, 0.0, 0.0).toHexString();
   soundButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
   soundButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-  // soundButton.addEventListener("")
+
   uiTexture.addControl(soundButton);
+
+  // Функция для обновления иконки
+  function updateIcon() {
+    soundButton.image.source = flagSoundOn ? "img/speaker.png" : "img/no_sound.png";
+  }
+
+  // Обработчик клика для Babylon.GUI
+  soundButton.onPointerClickObservable.add(() => {
+    flagSoundOn = !flagSoundOn; // Инвертируем значение
+    updateIcon();
+
+    // Логика управления звуком
+    if (flagSoundOn) {
+      ambientSound.play(); // Включить звук
+    } else {
+      ambientSound.pause(); // Выключить звук
+    };
+  });
 
   
 
@@ -325,6 +345,10 @@ var createScene = function () {
   // blueStoneIco.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
   // blueStoneIco.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
   // rect.addControl(blueStoneIco);
+
+
+  
+  
 
   return scene;
 };
