@@ -87,9 +87,9 @@ var createScene = function () {
 
   const ambientSound = new Audio("sounds/ambient_sound.mp3");
   const fetchedCrystal = new Audio("sounds/fetched_crystal.wav");
-  ambientSound.autoplay = true;
+  // ambientSound.autoplay = true;
   ambientSound.loop = true;
-  
+
 
   // Создание "земли"
   const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 40, height: 40, }, scene);
@@ -253,7 +253,7 @@ var createScene = function () {
       const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
       if (distance < 3 && crystal.name != 'fetched') {
 
-        fetchedCrystal.play(); 
+        fetchedCrystal.play();
         onTouchCrystal(crystal.name);
         crystal.setEnabled(false);
         crystal.name = 'fetched';
@@ -265,7 +265,7 @@ var createScene = function () {
 
 
   // Включаем инспектор в совмещенном режиме
-  // scene.debugLayer.show({ embedMode: true, showCollisions: true });
+  scene.debugLayer.show({ embedMode: true, showCollisions: true });
 
   // Создание элементов пользовательского интерфейса и получение значения полей счетчика
   let uiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -308,7 +308,7 @@ var createScene = function () {
     };
   });
 
-  
+
 
   // Функция изменения количества собранных кристаллов
   function onTouchCrystal(crystalName) {
@@ -346,9 +346,115 @@ var createScene = function () {
   // blueStoneIco.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
   // rect.addControl(blueStoneIco);
 
+  // Создание снегопада
 
-  
-  
+  let snowSettings = {
+    "name": "snow",
+    "id": "default system",
+    "capacity": 10000,
+    "disposeOnStop": false,
+    "manualEmitCount": -1,
+    "emitter": [0, 0, 0],
+    "particleEmitterType": {
+      "type": "BoxParticleEmitter",
+      "direction1": [0, -1, 0],
+      "direction2": [0, -1, 0],
+      "minEmitBox": [-20, 10, -20],
+      "maxEmitBox": [20, 0, 20]
+    }, "texture": {
+      "tags": null,
+      "url": "img/snowflake.png",
+      "vOffset": 0,
+      "uScale": 1,
+      "vScale": 1,
+      "uAng": 0,
+      "vAng": 0,
+      "wAng": 0,
+      "uRotationCenter": 0.5,
+      "vRotationCenter": 0.5,
+      "wRotationCenter": 0.5,
+      "homogeneousRotationInUVTransform": false,
+      "isBlocking": true,
+      "name": "img/snowflake.png",
+      "hasAlpha": false,
+      "getAlphaFromRGB": false,
+      "level": 1,
+      "coordinatesIndex": 0,
+      "optimizeUVAllocation": true,
+      "coordinatesMode": 0,
+      "wrapU": 1,
+      "wrapV": 1,
+      "wrapR": 1,
+      "anisotropicFilteringLevel": 4,
+      "isCube": false,
+      "is3D": false,
+      "is2DArray": false,
+      "gammaSpace": true,
+      "invertZ": false,
+      "lodLevelInAlpha": false,
+      "lodGenerationOffset": 0,
+      "lodGenerationScale": 0,
+      "linearSpecularLOD": false,
+      "isRenderTarget": false,
+      "animations": [],
+      "invertY": true,
+      "samplingMode": 3,
+      "_useSRGBBuffer": false,
+      "internalTextureLabel": "img/snowflake.png",
+      "noMipmap": false
+    }, "isLocal": false,
+    "animations": [],
+    "beginAnimationOnStart": false,
+    "beginAnimationFrom": 0,
+    "beginAnimationTo": 60,
+    "beginAnimationLoop": false,
+    "startDelay": 0,
+    "renderingGroupId": 0,
+    "isBillboardBased": true,
+    "billboardMode": 7,
+    "minAngularSpeed": 0,
+    "maxAngularSpeed": 0,
+    "minSize": 0.05,
+    "maxSize": 0.1,
+    "minScaleX": 1,
+    "maxScaleX": 1,
+    "minScaleY": 1,
+    "maxScaleY": 1,
+    "minEmitPower": 1,
+    "maxEmitPower": 2,
+    "minLifeTime": 0.5,
+    "maxLifeTime": 2,
+    "emitRate": 600,
+    "gravity": [0, 0, 0],
+    "noiseStrength": [10, 10, 10],
+    "color1": [1, 1, 1, 1],
+    "color2": [1, 1, 1, 1],
+    "colorDead": [1, 1, 1, 0],
+    "updateSpeed": 0.016666666666666666,
+    "targetStopDuration": 0,
+    "blendMode": 0,
+    "preWarmCycles": 0,
+    "preWarmStepOffset": 1,
+    "minInitialRotation": 0,
+    "maxInitialRotation": 0,
+    "startSpriteCellID": 0,
+    "spriteCellLoop": true,
+    "endSpriteCellID": 0,
+    "spriteCellChangeSpeed": 1,
+    "spriteCellWidth": 0,
+    "spriteCellHeight": 0,
+    "spriteRandomStartCell": false,
+    "isAnimationSheetEnabled": false,
+    "useLogarithmicDepth": false,
+    "lifeTimeGradients": [],
+    "textureMask": [1, 1, 1, 1],
+    "customShader": null,
+    "preventAutoStart": false,
+    "worldOffset": [0, 0, 0]
+  };
+  let snow = BABYLON.ParticleSystem.Parse(snowSettings, scene);
+
+
 
   return scene;
 };
