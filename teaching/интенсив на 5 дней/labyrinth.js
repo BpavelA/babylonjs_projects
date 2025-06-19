@@ -99,7 +99,7 @@ var createScene = function () {
   const groundTexture = new BABYLON.StandardMaterial("groundMat", scene);
 
   // Задание материалу текстуры
-  groundTexture.diffuseTexture = new BABYLON.Texture("img/grass.png");
+  groundTexture.diffuseTexture = new BABYLON.Texture("img/snow.jpg");
 
   // Наложение материала на землю
   ground.material = groundTexture;
@@ -346,115 +346,48 @@ var createScene = function () {
   // blueStoneIco.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
   // rect.addControl(blueStoneIco);
 
-  // Создание снегопада
 
-  let snowSettings = {
-    "name": "snow",
-    "id": "default system",
-    "capacity": 10000,
-    "disposeOnStop": false,
-    "manualEmitCount": -1,
-    "emitter": [0, 0, 0],
-    "particleEmitterType": {
-      "type": "BoxParticleEmitter",
-      "direction1": [0, -1, 0],
-      "direction2": [0, -1, 0],
-      "minEmitBox": [-20, 10, -20],
-      "maxEmitBox": [20, 0, 20]
-    }, "texture": {
-      "tags": null,
-      "url": "img/snowflake.png",
-      "vOffset": 0,
-      "uScale": 1,
-      "vScale": 1,
-      "uAng": 0,
-      "vAng": 0,
-      "wAng": 0,
-      "uRotationCenter": 0.5,
-      "vRotationCenter": 0.5,
-      "wRotationCenter": 0.5,
-      "homogeneousRotationInUVTransform": false,
-      "isBlocking": true,
-      "name": "img/snowflake.png",
-      "hasAlpha": false,
-      "getAlphaFromRGB": false,
-      "level": 1,
-      "coordinatesIndex": 0,
-      "optimizeUVAllocation": true,
-      "coordinatesMode": 0,
-      "wrapU": 1,
-      "wrapV": 1,
-      "wrapR": 1,
-      "anisotropicFilteringLevel": 4,
-      "isCube": false,
-      "is3D": false,
-      "is2DArray": false,
-      "gammaSpace": true,
-      "invertZ": false,
-      "lodLevelInAlpha": false,
-      "lodGenerationOffset": 0,
-      "lodGenerationScale": 0,
-      "linearSpecularLOD": false,
-      "isRenderTarget": false,
-      "animations": [],
-      "invertY": true,
-      "samplingMode": 3,
-      "_useSRGBBuffer": false,
-      "internalTextureLabel": "img/snowflake.png",
-      "noMipmap": false
-    }, "isLocal": false,
-    "animations": [],
-    "beginAnimationOnStart": false,
-    "beginAnimationFrom": 0,
-    "beginAnimationTo": 60,
-    "beginAnimationLoop": false,
-    "startDelay": 0,
-    "renderingGroupId": 0,
-    "isBillboardBased": true,
-    "billboardMode": 7,
-    "minAngularSpeed": 0,
-    "maxAngularSpeed": 0,
-    "minSize": 0.05,
-    "maxSize": 0.1,
-    "minScaleX": 1,
-    "maxScaleX": 1,
-    "minScaleY": 1,
-    "maxScaleY": 1,
-    "minEmitPower": 1,
-    "maxEmitPower": 2,
-    "minLifeTime": 0.5,
-    "maxLifeTime": 2,
-    "emitRate": 600,
-    "gravity": [0, 0, 0],
-    "noiseStrength": [10, 10, 10],
-    "color1": [1, 1, 1, 1],
-    "color2": [1, 1, 1, 1],
-    "colorDead": [1, 1, 1, 0],
-    "updateSpeed": 0.016666666666666666,
-    "targetStopDuration": 0,
-    "blendMode": 0,
-    "preWarmCycles": 0,
-    "preWarmStepOffset": 1,
-    "minInitialRotation": 0,
-    "maxInitialRotation": 0,
-    "startSpriteCellID": 0,
-    "spriteCellLoop": true,
-    "endSpriteCellID": 0,
-    "spriteCellChangeSpeed": 1,
-    "spriteCellWidth": 0,
-    "spriteCellHeight": 0,
-    "spriteRandomStartCell": false,
-    "isAnimationSheetEnabled": false,
-    "useLogarithmicDepth": false,
-    "lifeTimeGradients": [],
-    "textureMask": [1, 1, 1, 1],
-    "customShader": null,
-    "preventAutoStart": false,
-    "worldOffset": [0, 0, 0]
-  };
-  let snow = BABYLON.ParticleSystem.Parse(snowSettings, scene);
+  // 1. Создаем систему частиц
+  const snow = new BABYLON.ParticleSystem("snow", 10000, scene);
+
+  // 2. Указываем путь к изображению снежинки
+  snow.particleTexture = new BABYLON.Texture("img/snowflake.png", scene);
+
+  // 3. Настройка внешнего вида частиц
+  snow.minSize = 0.05;
+  snow.maxSize = 0.2;
+  snow.minLifeTime = 5.0;
+  snow.maxLifeTime = 15.0;
+
+  // 4. Цвет частиц (можно оставить белым или добавить легкий оттенок)
+  // snow.color1 = new BABYLON.Color4(0.9, 0.9, 1.0, 1.0);
+  // snow.color2 = new BABYLON.Color4(1.0, 1.0, 1.0, 1.0);
+  // snow.colorDead = new BABYLON.Color4(1.0, 1.0, 1.0, 0.0);
+
+  // 5. Настройка поведения частиц
+  snow.emitRate = 600; // Количество снежинок в секунду
+  snow.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
+
+  // 6. Настройка направления и гравитации
+  snow.gravity = new BABYLON.Vector3(0, -0.5, 0);
+  snow.direction1 = new BABYLON.Vector3(1, -1, 1);
+  snow.direction2 = new BABYLON.Vector3(-1, -1, -1);
+
+  // 7. Настройка области появления частиц
+  snow.minEmitBox = new BABYLON.Vector3(-20, 10, -20);
+  snow.maxEmitBox = new BABYLON.Vector3(20, 10, 20);
+
+  // 8. Вращение снежинок
+  snow.minAngularSpeed = 0;
+  snow.maxAngularSpeed = Math.PI;
+
+  // Анимация размера снежинок
+  snow.addSizeGradient(0, 0.1);  // В начале жизни
+  snow.addSizeGradient(1, 0.3);  // В конце жизни
 
 
+  // Начало работы системы
+  snow.start();
 
   return scene;
 };
