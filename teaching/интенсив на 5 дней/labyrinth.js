@@ -51,11 +51,9 @@ var createScene = function () {
   // Создание источника света
 
   const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-
   const light2 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-40, 30, 20), scene);
 
   // const light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(0, -1, 0), scene);
-
   // const light = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(-Math.cos(Math.PI / 6), 20, -Math.sin(Math.PI / 6)), new BABYLON.Vector3(0, -1, 0), Math.PI / 2, 1.5, scene);
 
   // Создаем в небе луну
@@ -69,8 +67,6 @@ var createScene = function () {
   // Изменяем интенсивность света
   light.intensity = 0.3;
   light2.intensity = 0.5;
-
-
 
   // Добавляем свету цвет
   // light.diffuse = new BABYLON.Color3(1, 0, 0);
@@ -87,9 +83,9 @@ var createScene = function () {
 
   const ambientSound = new Audio("sounds/ambient_sound.mp3");
   const fetchedCrystal = new Audio("sounds/fetched_crystal.wav");
+  const snowSteps = new Audio("sounds/snow_steps.wav");
   // ambientSound.autoplay = true;
   ambientSound.loop = true;
-
 
   // Создание "земли"
   const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 40, height: 40, }, scene);
@@ -219,12 +215,6 @@ var createScene = function () {
     };
   };
 
-
-
-
-
-
-
   // СОЗДАНИЕ НЕБА
   // Создаем сферу
   const skybox = BABYLON.MeshBuilder.CreateSphere("sky", { diameter: 1000 }, scene);
@@ -243,16 +233,14 @@ var createScene = function () {
   skybox.material = skyboxMaterial;
 
   // Включаем и настраиваем туман
-
   scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
   scene.fogColor = new BABYLON.Color3(0.1, 0.2, 0.1);
 
-  // Отлавливаем столкновение камеры с кристаллами и обновляем счетчики
+  // Отлавливаем столкновение камеры с кристаллами, обновляем счетчики, проигрываем звук
   scene.registerBeforeRender(() => {
     crystals.forEach(crystal => {
       const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
       if (distance < 3 && crystal.name != 'fetched') {
-
         fetchedCrystal.play();
         onTouchCrystal(crystal.name);
         crystal.setEnabled(false);
@@ -261,8 +249,6 @@ var createScene = function () {
     });
     scene.fogDensity = 0.1 + Math.sin(Date.now() * 0.001) * 0.005;
   });
-
-
 
   // Включаем инспектор в совмещенном режиме
   scene.debugLayer.show({ embedMode: true, showCollisions: true });
@@ -287,7 +273,6 @@ var createScene = function () {
   soundButton.color = new BABYLON.Color4(0.0, 0.0, 0.0, 0.0).toHexString();
   soundButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
   soundButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-
   uiTexture.addControl(soundButton);
 
   // Функция для обновления иконки
@@ -346,48 +331,57 @@ var createScene = function () {
   // blueStoneIco.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
   // rect.addControl(blueStoneIco);
 
+  // Создаем снегопад
 
   // 1. Создаем систему частиц
   const snow = new BABYLON.ParticleSystem("snow", 10000, scene);
-
   // 2. Указываем путь к изображению снежинки
   snow.particleTexture = new BABYLON.Texture("img/snowflake.png", scene);
-
   // 3. Настройка внешнего вида частиц
   snow.minSize = 0.05;
   snow.maxSize = 0.2;
   snow.minLifeTime = 5.0;
   snow.maxLifeTime = 15.0;
-
-  // 4. Цвет частиц (можно оставить белым или добавить легкий оттенок)
-  // snow.color1 = new BABYLON.Color4(0.9, 0.9, 1.0, 1.0);
-  // snow.color2 = new BABYLON.Color4(1.0, 1.0, 1.0, 1.0);
-  // snow.colorDead = new BABYLON.Color4(1.0, 1.0, 1.0, 0.0);
-
-  // 5. Настройка поведения частиц
+  // 4. Настройка поведения частиц
   snow.emitRate = 600; // Количество снежинок в секунду
   snow.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
-
-  // 6. Настройка направления и гравитации
+  // 5. Настройка направления и гравитации
   snow.gravity = new BABYLON.Vector3(0, -0.5, 0);
   snow.direction1 = new BABYLON.Vector3(1, -1, 1);
   snow.direction2 = new BABYLON.Vector3(-1, -1, -1);
-
-  // 7. Настройка области появления частиц
+  // 6. Настройка области появления частиц
   snow.minEmitBox = new BABYLON.Vector3(-20, 10, -20);
   snow.maxEmitBox = new BABYLON.Vector3(20, 10, 20);
-
-  // 8. Вращение снежинок
+  // 7. Вращение снежинок
   snow.minAngularSpeed = 0;
   snow.maxAngularSpeed = Math.PI;
-
   // Анимация размера снежинок
   snow.addSizeGradient(0, 0.1);  // В начале жизни
   snow.addSizeGradient(1, 0.3);  // В конце жизни
-
-
   // Начало работы системы
   snow.start();
+
+  // Звук шагов
+
+  let eventCodes = ["Numpad2", "Numpad4", "Numpad6", "Numpad8"];
+  
+  let isPlaying = false;
+  snowSteps.loop = true;
+
+  window.addEventListener('keydown', (event) => {
+    if (eventCodes.includes(event.code) && !isPlaying) {
+      snowSteps.play();
+      isPlaying = true;
+    }
+  });
+
+  window.addEventListener('keyup', (event) => {
+    console.log(event.code);
+    if (eventCodes.includes(event.code)) {
+      snowSteps.pause();
+      isPlaying = false;
+    }
+  });
 
   return scene;
 };
