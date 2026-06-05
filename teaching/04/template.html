@@ -31,6 +31,7 @@
     <!-- touch-action="none" for best results from PEP -->
 
     <script>
+
       const canvas = document.getElementById("renderCanvas"); // Get the canvas element
       const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
 
@@ -69,15 +70,16 @@
         // Default intensity is 1. Let's dim the light a small amount
         light.intensity = 0.7;
 
-        BABYLON.ImportMeshAsync("car.glb").then((result) => {
-          var car = scene.getMeshByName("car");
-          car.position.y = 0.2;
-        });
+        // BABYLON.ImportMeshAsync("car.glb").then((car) => {
+        //   // var car = scene.getMeshByName("car");
+        //   // result.position.y = 0.2;
+        //   // result.position.x = -2;
+        //   car.position = new BABYLON.Vector3(0, 1, 0);
+        // });
 
-        BABYLON.ImportMeshAsync("blue.glb", scene).then(() => {
-          let stone = meshes[0];
-          // stone.setParent(null);
-          stone.position = new BABYLON.Vector3(-10, 0, 10);
+        BABYLON.ImportMeshAsync("blue.glb", scene).then((stone) => {
+          stone.meshes[0].position = new BABYLON.Vector3(0, 0.1, 0);
+          stone.meshes[0].scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
         });
 
         // Our built-in 'ground' shape.
