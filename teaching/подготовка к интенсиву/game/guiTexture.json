@@ -53,7 +53,7 @@
     "fontSize": "18px",
     "children": [
       {
-        "tags": ["2:0", "1:0", "0:0", "0:1", "1:1", "2:1"],
+        "tags": ["2:0", "1:0", "0:0", "2:1", "1:1", "0:1"],
         "clipContent": true,
         "delegatePickingToChildren": false,
         "renderToIntermediateTexture": false,
@@ -61,7 +61,12 @@
         "adaptHeightToChildren": false,
         "adaptWidthToChildren": false,
         "background": "",
-        "metadata": { "_previousCenter": { "x": -418, "y": -98 } },
+        "metadata": {
+          "_previousCenter": {
+            "x": -307.55938720703125,
+            "y": -203.8000030517578
+          }
+        },
         "isHitTestVisible": true,
         "isPointerBlocker": true,
         "isFocusInvisible": false,
@@ -82,19 +87,19 @@
         "horizontalAlignment": 0,
         "verticalAlignment": 0,
         "fixedRatio": 0,
-        "fixedRatioMasterIsWidth": true,
-        "width": "350px",
-        "height": "550px",
+        "fixedRatioMasterIsWidth": false,
+        "width": "25%",
+        "height": "60%",
         "color": "",
         "zIndex": 0,
         "notRenderable": false,
         "isVisible": true,
         "descendantsOnlyPadding": false,
-        "paddingLeft": "10px",
+        "paddingLeft": "20px",
         "paddingRight": "0px",
-        "paddingTop": "10px",
+        "paddingTop": "20px",
         "paddingBottom": "0px",
-        "left": "0px",
+        "left": "-1.359399390801002px",
         "top": "0px",
         "linkOffsetX": "0px",
         "linkOffsetY": "0px",
@@ -112,13 +117,16 @@
             "sourceWidth": 0,
             "sourceHeight": 0,
             "populateNinePatchSlicesFromImage": false,
-            "autoScale": true,
+            "autoScale": false,
             "stretch": 1,
             "source": "img/magic.png",
             "cellWidth": 0,
             "cellHeight": 0,
             "cellId": -1,
-            "metadata": { "_previousCenter": { "x": 1, "y": 1 } },
+            "metadata": {
+              "_previousCenter": { "x": 1, "y": 1 },
+              "_cellInfo": { "row": "1", "column": "0" }
+            },
             "isHitTestVisible": true,
             "isPointerBlocker": true,
             "isFocusInvisible": false,
@@ -141,8 +149,8 @@
             "verticalAlignment": 2,
             "fixedRatio": 0,
             "fixedRatioMasterIsWidth": false,
-            "width": "174px",
-            "height": "218px",
+            "width": "80%",
+            "height": "80%",
             "color": "transparent",
             "zIndex": 0,
             "notRenderable": false,
@@ -170,13 +178,16 @@
             "sourceWidth": 0,
             "sourceHeight": 0,
             "populateNinePatchSlicesFromImage": false,
-            "autoScale": true,
+            "autoScale": false,
             "stretch": 1,
             "source": "img/green.png",
             "cellWidth": 0,
             "cellHeight": 0,
             "cellId": -1,
-            "metadata": {},
+            "metadata": {
+              "_previousCenter": { "x": 1, "y": 1 },
+              "_cellInfo": { "row": "1", "column": "0" }
+            },
             "isHitTestVisible": true,
             "isPointerBlocker": true,
             "isFocusInvisible": false,
@@ -199,8 +210,8 @@
             "verticalAlignment": 2,
             "fixedRatio": 0,
             "fixedRatioMasterIsWidth": false,
-            "width": "208px",
-            "height": "203px",
+            "width": "80%",
+            "height": "80%",
             "color": "transparent",
             "zIndex": 0,
             "notRenderable": false,
@@ -223,18 +234,21 @@
           },
           {
             "tags": null,
-            "sourceLeft": "0",
+            "sourceLeft": 0,
             "sourceTop": 0,
             "sourceWidth": 0,
             "sourceHeight": 0,
             "populateNinePatchSlicesFromImage": false,
-            "autoScale": true,
+            "autoScale": false,
             "stretch": 0,
             "source": "img/blue.png",
-            "cellWidth": 1024,
-            "cellHeight": 1024,
+            "cellWidth": 0,
+            "cellHeight": 0,
             "cellId": -1,
-            "metadata": { "_previousCenter": { "x": 1, "y": 1 } },
+            "metadata": {
+              "_previousCenter": { "x": 1, "y": 1 },
+              "_cellInfo": { "row": "0", "column": "0" }
+            },
             "isHitTestVisible": true,
             "isPointerBlocker": true,
             "isFocusInvisible": false,
@@ -257,8 +271,8 @@
             "verticalAlignment": 2,
             "fixedRatio": 0,
             "fixedRatioMasterIsWidth": false,
-            "width": "192px",
-            "height": "191px",
+            "width": "80%",
+            "height": "80%",
             "color": "transparent",
             "zIndex": 0,
             "notRenderable": false,
@@ -294,7 +308,22 @@
             "outlineColor": "white",
             "wordDivider": " ",
             "forceResizeWidth": false,
-            "metadata": { "_previousCenter": { "x": 1, "y": 1 } },
+            "metadata": {
+              "_previousCenter": { "x": 1, "y": 1 },
+              "_cellInfo": { "row": "1", "column": "1" },
+              "localBounds": {
+                "left": -25,
+                "top": -50.5,
+                "right": 25,
+                "bottom": 50.5
+              },
+              "storedValues": {
+                "left": 0,
+                "top": 0,
+                "right": 50,
+                "bottom": 101
+              }
+            },
             "isHitTestVisible": true,
             "isPointerBlocker": true,
             "isFocusInvisible": false,
@@ -307,9 +336,9 @@
             "shadowColor": "black",
             "hoverCursor": "",
             "fontOffset": {
-              "ascent": 54.400000751018524,
-              "height": 68.00000303983688,
-              "descent": 13.60000228881836
+              "ascent": 81.45452880859375,
+              "height": 101.81817626953125,
+              "descent": 20.3636474609375
             },
             "alpha": 1,
             "isSerializable": true,
@@ -322,8 +351,8 @@
             "verticalAlignment": 2,
             "fixedRatio": 0,
             "fixedRatioMasterIsWidth": true,
-            "width": "33px",
-            "height": "68px",
+            "width": "50px",
+            "height": "101px",
             "color": "#000000",
             "zIndex": 0,
             "notRenderable": false,
@@ -340,9 +369,9 @@
             "isEnabled": true,
             "disabledColor": "#9a9a9a",
             "disabledColorItem": "#6a6a6a",
-            "name": "blueTxt",
+            "name": "magicText",
             "className": "TextBlock",
-            "fontSize": "60px"
+            "fontSize": "90px"
           },
           {
             "tags": null,
@@ -359,7 +388,22 @@
             "outlineColor": "white",
             "wordDivider": " ",
             "forceResizeWidth": false,
-            "metadata": { "_previousCenter": { "x": 1, "y": 1 } },
+            "metadata": {
+              "_previousCenter": { "x": 1, "y": 1 },
+              "_cellInfo": { "row": "1", "column": "1" },
+              "localBounds": {
+                "left": -25,
+                "top": -50.5,
+                "right": 25,
+                "bottom": 50.5
+              },
+              "storedValues": {
+                "left": 0,
+                "top": 0,
+                "right": 50,
+                "bottom": 101
+              }
+            },
             "isHitTestVisible": true,
             "isPointerBlocker": true,
             "isFocusInvisible": false,
@@ -372,9 +416,9 @@
             "shadowColor": "black",
             "hoverCursor": "",
             "fontOffset": {
-              "ascent": 54.400000751018524,
-              "height": 68.00000303983688,
-              "descent": 13.60000228881836
+              "ascent": 81.45452880859375,
+              "height": 101.81817626953125,
+              "descent": 20.3636474609375
             },
             "alpha": 1,
             "isSerializable": true,
@@ -387,8 +431,8 @@
             "verticalAlignment": 2,
             "fixedRatio": 0,
             "fixedRatioMasterIsWidth": true,
-            "width": "33px",
-            "height": "68px",
+            "width": "50px",
+            "height": "101px",
             "color": "#000000",
             "zIndex": 0,
             "notRenderable": false,
@@ -405,9 +449,9 @@
             "isEnabled": true,
             "disabledColor": "#9a9a9a",
             "disabledColorItem": "#6a6a6a",
-            "name": "greenTxt",
+            "name": "greenText",
             "className": "TextBlock",
-            "fontSize": "60px"
+            "fontSize": "90px"
           },
           {
             "tags": null,
@@ -424,7 +468,10 @@
             "outlineColor": "white",
             "wordDivider": " ",
             "forceResizeWidth": false,
-            "metadata": { "_previousCenter": { "x": 1, "y": 1 } },
+            "metadata": {
+              "_previousCenter": { "x": 1, "y": 1 },
+              "_cellInfo": { "row": "0", "column": "1" }
+            },
             "isHitTestVisible": true,
             "isPointerBlocker": true,
             "isFocusInvisible": false,
@@ -437,9 +484,9 @@
             "shadowColor": "black",
             "hoverCursor": "",
             "fontOffset": {
-              "ascent": 54.400000751018524,
-              "height": 68.00000303983688,
-              "descent": 13.60000228881836
+              "ascent": 81.45452880859375,
+              "height": 101.81817626953125,
+              "descent": 20.3636474609375
             },
             "alpha": 1,
             "isSerializable": true,
@@ -452,8 +499,8 @@
             "verticalAlignment": 2,
             "fixedRatio": 0,
             "fixedRatioMasterIsWidth": true,
-            "width": "33px",
-            "height": "68px",
+            "width": "50px",
+            "height": "101px",
             "color": "#000000",
             "zIndex": 0,
             "notRenderable": false,
@@ -470,9 +517,9 @@
             "isEnabled": true,
             "disabledColor": "#9a9a9a",
             "disabledColorItem": "#6a6a6a",
-            "name": "magicTxt",
+            "name": "blueText",
             "className": "TextBlock",
-            "fontSize": "60px"
+            "fontSize": "90px"
           }
         ],
         "columnCount": 2,
@@ -489,6 +536,6 @@
       }
     ]
   },
-  "width": 1188,
-  "height": 748
+  "width": 1024,
+  "height": 1024
 }

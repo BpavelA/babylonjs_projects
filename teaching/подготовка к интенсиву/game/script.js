@@ -1,8 +1,20 @@
+// Импорт файла json с нанстройками ui
+const ui = await(await fetch('guiTexture.json')).json();
+
 // Получение элемента canvas
 let canvas = document.getElementById("renderCanvas");
 
 // Создание движка BABYLON с привязкой к холсту
 let engine = new BABYLON.Engine(canvas, true);
+
+// Создаем счетчики кристаллов за пределами сцены
+let blueCounter = 0,
+  greenCounter = 0,
+  magicCounter = 0;
+
+let blueText;
+let greenText;
+let magicText;
 
 // Функция, которая создает сцену
 let createScene = function () {
@@ -182,6 +194,13 @@ let createScene = function () {
 
   // Создание элементов пользовательского интерфейса
   let uiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+  // Получение доступа к необходимым элементам
+  uiTexture.parseSerializedObject(ui);
+  let root = uiTexture.getChildren()[0];
+  blueText = root.getDescendants(false, function (node) { return node.name === 'blueText'; })[0];
+  greenText = root.getDescendants(false, function (node) { return node.name === 'greenText'; })[0];
+  magicText = root.getDescendants(false, function (node) { return node.name === 'magicText'; })[0];
 
   return scene;
 }
