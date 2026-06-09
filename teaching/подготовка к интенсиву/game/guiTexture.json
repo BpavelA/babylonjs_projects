@@ -371,7 +371,7 @@
             "disabledColorItem": "#6a6a6a",
             "name": "magicText",
             "className": "TextBlock",
-            "fontSize": "90px"
+            "fontSize": "60px"
           },
           {
             "tags": null,
@@ -451,7 +451,7 @@
             "disabledColorItem": "#6a6a6a",
             "name": "greenText",
             "className": "TextBlock",
-            "fontSize": "90px"
+            "fontSize": "60px"
           },
           {
             "tags": null,
@@ -519,7 +519,7 @@
             "disabledColorItem": "#6a6a6a",
             "name": "blueText",
             "className": "TextBlock",
-            "fontSize": "90px"
+            "fontSize": "60px"
           }
         ],
         "columnCount": 2,
