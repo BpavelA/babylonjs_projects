@@ -191,6 +191,7 @@ let createScene = function () {
 
   // Включение отладчика (инспектора)
   scene.debugLayer.show({ embedMode: true, showCollisions: true });
+  // scene.debugLayer.show();
 
   // Создание элементов пользовательского интерфейса
   let uiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
