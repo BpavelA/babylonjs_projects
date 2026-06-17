@@ -32,11 +32,11 @@ let createScene = function () {
   camera.attachControl(canvas, true);
 
   // Настройка камеры
-  camera.applyGravity = true;        // Включить гравитацию
-  camera.checkCollisions = true;     // Включить коллизии
-  camera.collisionRetryCheck = true; // Постоянная проверка коллизий
-  camera.speed = 0.1;                // Скорость движения
-  camera.ellipsoid = new BABYLON.Vector3(1.2, 1.1, 1.2); // Создание эллипсоида камеры для участия в коллизиях
+  // camera.applyGravity = true;        // Включить гравитацию
+  // camera.checkCollisions = true;     // Включить коллизии
+  // camera.collisionRetryCheck = true; // Постоянная проверка коллизий
+  // camera.speed = 0.1;                // Скорость движения
+  // camera.ellipsoid = new BABYLON.Vector3(1.2, 1.1, 1.2); // Создание эллипсоида камеры для участия в коллизиях
 
 
   // Создание полусферического источника света
@@ -202,6 +202,32 @@ let createScene = function () {
   blueText = root.getDescendants(false, function (node) { return node.name === 'blueText'; })[0];
   greenText = root.getDescendants(false, function (node) { return node.name === 'greenText'; })[0];
   magicText = root.getDescendants(false, function (node) { return node.name === 'magicText'; })[0];
+
+  // Функция изменения количества собранных кристаллов
+  function onTouchCrystal(crystalName) {
+    switch (crystalName) {
+      case 'blue': blueText.text = ++blueCounter; break;
+      case 'green': greenText.text = ++greenCounter; break;
+      case 'magic': magicText.text = ++magicCounter; break;
+    };
+  };
+
+
+  // Отлавливаем столкновение камеры с кристаллами и обновляем счетчики
+  scene.registerBeforeRender(() => {
+    crystals.forEach(crystal => {
+      const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
+      if (distance < 3 && crystal.name != 'fetched') {
+
+        onTouchCrystal(crystal.name);
+        crystal.setEnabled(false);
+        crystal.name = 'fetched';
+      };
+    });
+
+  });
+
+
 
   return scene;
 }

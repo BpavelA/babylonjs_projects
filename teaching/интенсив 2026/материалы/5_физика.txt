@@ -1,0 +1,17 @@
+// Добавление ссылки на движок в файле html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+
+//// Создание базового объекта сцены Babylon
+  var scene = new BABYLON.Scene(engine);
+
+// Создание физического движка
+scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin(true, CANNON));
+
+//// Предотвращение столкновений
+ground.checkCollisions = true;
+
+// Физика земли
+ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.7 }, scene);
+
+// Добавление физики стенам лабиринта (внутри цикла)
+box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.7 }, scene);
