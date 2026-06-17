@@ -1,0 +1,35 @@
+
+// Добавление иконки включения и выключения звука
+// Создание переменных для управления
+
+  let iconPath = "img/speaker.png";
+  let flagSoundOn = true;
+
+// Создание и добавление иконки в интерфейс
+  let soundButton = BABYLON.GUI.Button.CreateImageOnlyButton("soundIcon", "img/speaker.png");
+  soundButton.height = "48px";
+  soundButton.width = "48px";
+  soundButton.top = "-10px";
+  soundButton.left = "10px";
+  soundButton.color = new BABYLON.Color4(0.0, 0.0, 0.0, 0.0).toHexString();
+  soundButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+  soundButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+  uiTexture.addControl(soundButton);
+
+  // Функция для обновления иконки
+  function updateIcon() {
+    soundButton.image.source = flagSoundOn ? "img/speaker.png" : "img/no_sound.png";
+  }
+
+  // Обработчик клика для Babylon.GUI
+  soundButton.onPointerClickObservable.add(() => {
+    flagSoundOn = !flagSoundOn; // Инвертируем значение
+    updateIcon();
+
+    // Логика управления звуком
+    if (flagSoundOn) {
+      ambientSound.play(); // Включить звук
+    } else {
+      ambientSound.pause(); // Выключить звук
+    };
+  });

@@ -32,11 +32,11 @@ let createScene = function () {
   camera.attachControl(canvas, true);
 
   // Настройка камеры
-  // camera.applyGravity = true;        // Включить гравитацию
-  // camera.checkCollisions = true;     // Включить коллизии
-  // camera.collisionRetryCheck = true; // Постоянная проверка коллизий
-  // camera.speed = 0.1;                // Скорость движения
-  // camera.ellipsoid = new BABYLON.Vector3(1.2, 1.1, 1.2); // Создание эллипсоида камеры для участия в коллизиях
+  camera.applyGravity = true;        // Включить гравитацию
+  camera.checkCollisions = true;     // Включить коллизии
+  camera.collisionRetryCheck = true; // Постоянная проверка коллизий
+  camera.speed = 0.1;                // Скорость движения
+  camera.ellipsoid = new BABYLON.Vector3(1.2, 1.1, 1.2); // Создание эллипсоида камеры для участия в коллизиях
 
 
   // Создание полусферического источника света

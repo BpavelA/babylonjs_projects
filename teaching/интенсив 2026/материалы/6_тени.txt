@@ -1,0 +1,17 @@
+// Инициализируем генератор теней
+  const shadowGenerator = new BABYLON.ShadowGenerator(1024, light2);
+  shadowGenerator.usePoissonSampling = true;
+  shadowGenerator.useBlurExponentialShadowMap = true;
+  shadowGenerator.blurKernel = 32;
+
+// Земля получает тени 
+  ground.receiveShadows = true;
+
+// Кристаллы получают тени
+
+ shadowGenerator.addShadowCaster(child, true);
+
+
+// Стены лабиринта получают тени
+     
+shadowGenerator.addShadowCaster(box, true);

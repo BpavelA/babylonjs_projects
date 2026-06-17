@@ -1,0 +1,23 @@
+// Функция изменения количества собранных кристаллов
+  function onTouchCrystal(crystalName) {
+    switch (crystalName) {
+      case 'blue': blueText.text = ++blueCounter; break;
+      case 'green': greenText.text = ++greenCounter; break;
+      case 'magic': magicText.text = ++magicCounter; break;
+    };
+  };
+
+
+// Отлавливаем столкновение камеры с кристаллами и обновляем счетчики
+  scene.registerBeforeRender(() => {
+    crystals.forEach(crystal => {
+      const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
+      if (distance < 3 && crystal.name != 'fetched') {
+        
+        onTouchCrystal(crystal.name);
+        crystal.setEnabled(false);
+        crystal.name = 'fetched';
+      };
+    });
+
+  });
