@@ -1,0 +1,12 @@
+// Анимация кристаллов
+    const frameRate = 25;
+    const crystalUpDownAnimation = new BABYLON.Animation("crystalUpDownAnimation", "position.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    const crystalUpDownAnimationKeys = [];
+    crystalUpDownAnimationKeys.push({ frame: 0, value: 0.4 });
+    crystalUpDownAnimationKeys.push({ frame: frameRate * 2, value: 0.5 });
+    crystalUpDownAnimationKeys.push({ frame: frameRate * 4, value: 0.6 });
+    crystalUpDownAnimationKeys.push({ frame: frameRate * 6, value: 0.5 });
+    crystalUpDownAnimationKeys.push({ frame: frameRate * 8, value: 0.4 });
+    crystalUpDownAnimation.setKeys(crystalUpDownAnimationKeys);
+    crystal.animations = [crystalUpDownAnimation];
+    scene.beginAnimation(crystal, 0, frameRate * 8, true);

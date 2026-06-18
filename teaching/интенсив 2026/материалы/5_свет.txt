@@ -11,6 +11,6 @@ let mond = new BABYLON.MeshBuilder.CreateSphere('mond', { diameter: 2 }, scene);
   mond.material = mondMat;
 
 // Добавляем свету цвет
-light.diffuse = new BABYLON.Color3(1, 0, 0);
-light.specular = new BABYLON.Color3(0, 1, 0);
-light.groundColor = new BABYLON.Color3(0, 1, 0);
+light2.diffuse = new BABYLON.Color3(0.5, 0.2, 0.1);
+light2.specular = new BABYLON.Color3(0.5, 0.2, 0.1);
+light2.groundColor = new BABYLON.Color3(0.5, 0.2, 0.1);

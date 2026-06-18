@@ -1,8 +1,0 @@
-// Добавляем звуки на сцену
-const ambientSound = new Audio("sounds/ambient_sound.mp3");
-const fetchedCrystal = new Audio("sounds/fetched_crystal.wav");
-ambientSound.autoplay = true;
-ambientSound.loop = true;
-
-// Проигрываем звук при столкновении с кристаллами
-        fetchedCrystal.play();

@@ -41,6 +41,15 @@ let createScene = function () {
   // Задание источнику сцета интенсивности
   light.intensity = 0.7;
 
+
+  // Добавление звуков в игру
+
+  const ambientSound = new Audio("sounds/ambient_sound.mp3");
+  const fetchedCrystalSound = new Audio("sounds/fetched_crystal.wav");
+  // ambientSound.play();
+  ambientSound.loop;
+
+
   // Создание земли
   let ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 40, height: 40 }, scene);
 
@@ -190,16 +199,39 @@ let createScene = function () {
   // Создание элементов пользовательского интерфейса
   let uiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-  let blueText;
-  let greenText;
-  let magicText;
+  // let blueText;
+  // let greenText;
+  // let magicText;
 
   // Получение доступа к необходимым элементам
   uiTexture.parseSerializedObject(ui);
   let root = uiTexture.getChildren()[0];
-  blueText = root.getDescendants(false, function (node) { return node.name === 'blueText'; })[0];
-  greenText = root.getDescendants(false, function (node) { return node.name === 'greenText'; })[0];
-  magicText = root.getDescendants(false, function (node) { return node.name === 'magicText'; })[0];
+  let blueText = root.getDescendants(false, function (node) { return node.name === 'blueText'; })[0];
+  let greenText = root.getDescendants(false, function (node) { return node.name === 'greenText'; })[0];
+  let magicText = root.getDescendants(false, function (node) { return node.name === 'magicText'; })[0];
+
+  // Функция изменения количества собранных кристаллов
+  function onTouchCrystal(crystalName) {
+    switch (crystalName) {
+      case 'blue': blueText.text = ++blueCounter; break;
+      case 'green': greenText.text = ++greenCounter; break;
+      case 'magic': magicText.text = ++magicCounter; break;
+    };
+  };
+
+  // Отлавливаем столкновение камеры с кристаллами и обновляем счетчики
+  scene.registerBeforeRender(() => {
+    crystals.forEach(crystal => {
+      const distance = BABYLON.Vector3.Distance(camera.position, crystal.position);
+      if (distance < 3 && crystal.name != 'fetched') {
+        fetchedCrystalSound.play()
+        onTouchCrystal(crystal.name);
+        crystal.setEnabled(false);
+        crystal.name = 'fetched';
+      };
+    });
+
+  });
 
   return scene;
 
