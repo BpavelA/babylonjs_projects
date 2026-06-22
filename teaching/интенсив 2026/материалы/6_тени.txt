@@ -8,7 +8,6 @@
   ground.receiveShadows = true;
 
 // Кристаллы получают тени
-
  shadowGenerator.addShadowCaster(child, true);
 
 

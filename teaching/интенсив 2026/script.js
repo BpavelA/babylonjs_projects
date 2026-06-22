@@ -35,19 +35,41 @@ let createScene = function () {
   camera.speed = 0.1;                // Скорость движения
   camera.ellipsoid = new BABYLON.Vector3(1.2, 1.1, 1.2); // Создание эллипсоида камеры для участия в коллизиях
 
+
   // Создание полусферического источника света
   let light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-
   // Задание источнику сцета интенсивности
   light.intensity = 0.7;
 
+  // Добавление дополнительных источников света
+  const light2 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-40, 30, 20), scene);
+  light2.intensity = 1;
+
+  // Инициализируем генератор теней
+  const shadowGenerator = new BABYLON.ShadowGenerator(1024, light2);
+  shadowGenerator.usePoissonSampling = true;
+  shadowGenerator.useBlurExponentialShadowMap = true;
+  shadowGenerator.blurKernel = 32;
+
+  // Включаем и настраиваем туман
+  scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+  scene.fogColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+  scene.fogDensity = 0.2;
+
+  // Создаем в небе луну
+  let mond = new BABYLON.MeshBuilder.CreateSphere('mond', { diameter: 6 }, scene);
+  mond.position = light2.position;
+  mond.infiniteDistance = true;
+ let mondMat = new BABYLON.StandardMaterial('mondmat', scene);
+  mondMat.emissiveColor = new BABYLON.Color3(1, 1, 0.522);
+  mond.material = mondMat;
 
   // Добавление звуков в игру
 
   const ambientSound = new Audio("sounds/ambient_sound.mp3");
   const fetchedCrystalSound = new Audio("sounds/fetched_crystal.wav");
   // ambientSound.play();
-  ambientSound.loop;
+  ambientSound.loop = true;
 
 
   // Создание земли
@@ -67,6 +89,9 @@ let createScene = function () {
   // Предотвращение столкновений
   ground.checkCollisions = true;
 
+  // Земля получает тени 
+  ground.receiveShadows = true;
+
   // СОЗДАНИЕ НЕБА
   // Создаем сферу
   const skybox = BABYLON.MeshBuilder.CreateSphere("sky", { diameter: 1000 }, scene);
@@ -78,7 +103,7 @@ let createScene = function () {
   skyboxMaterial.backFaceCulling = false;
 
   // Текстура будет проецироваться на сферу как окружение.
-  skyboxMaterial.reflectionTexture = new BABYLON.Texture("textures/skybox3.jpg", scene, true, false);
+  skyboxMaterial.reflectionTexture = new BABYLON.Texture("textures/nightsky.jpg", scene, true, false);
 
   // Проецирует панорамную (equirectangular) текстуру на сферу, имитируя 360° окружение.
   skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.EQUIRECTANGULAR_MODE;
@@ -153,9 +178,25 @@ let createScene = function () {
     crystal.position = new BABYLON.Vector3(i + fieldShift, 0, j + fieldShift);
     crystal.scaling = new BABYLON.Vector3(1.5, 1.5, 1.5);
     crystal.name = type;
+
+    // Анимация кристаллов
+    const frameRate = 25;
+    const crystalUpDownAnimation = new BABYLON.Animation("crystalUpDownAnimation", "position.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    const crystalUpDownAnimationKeys = [];
+    crystalUpDownAnimationKeys.push({ frame: 0, value: 0.4 });
+    crystalUpDownAnimationKeys.push({ frame: frameRate * 2, value: 0.5 });
+    crystalUpDownAnimationKeys.push({ frame: frameRate * 4, value: 0.6 });
+    crystalUpDownAnimationKeys.push({ frame: frameRate * 6, value: 0.5 });
+    crystalUpDownAnimationKeys.push({ frame: frameRate * 8, value: 0.4 });
+    crystalUpDownAnimation.setKeys(crystalUpDownAnimationKeys);
+    crystal.animations = [crystalUpDownAnimation];
+    scene.beginAnimation(crystal, 0, frameRate * 8, true);
+
     crystal.getChildMeshes().forEach(child => {
       child.ellipsoid = new BABYLON.Vector3(2, 2, 2);
       child.checkCollisions = true;
+      // Кристаллы дают тени
+      shadowGenerator.addShadowCaster(child, true);
     });
     crystals.push(crystal);
   };
@@ -171,6 +212,8 @@ let createScene = function () {
           box.position.y = 2;
           box.material = matWal;
           box.checkCollisions = true;
+          // Стены лабиринта дают тени
+          shadowGenerator.addShadowCaster(box, true);
           break;
 
         // Добавление кристаллов в цикле
@@ -194,7 +237,7 @@ let createScene = function () {
 
 
   // Включение отладчика (инспектора)
-  scene.debugLayer.show({ embedMode: true, showCollisions: true });
+  // scene.debugLayer.show({ embedMode: true, showCollisions: true });
 
   // Создание элементов пользовательского интерфейса
   let uiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -231,6 +274,40 @@ let createScene = function () {
       };
     });
 
+  });
+
+  // Добавление иконки включения и выключения звука
+  // Создание переменных для управления
+
+  let flagSoundOn = true;
+
+  // Создание и добавление иконки в интерфейс
+  let soundButton = BABYLON.GUI.Button.CreateImageOnlyButton("soundIcon", "img/speaker.png");
+  soundButton.height = "48px";
+  soundButton.width = "48px";
+  soundButton.top = "-10px";
+  soundButton.left = "10px";
+  soundButton.color = new BABYLON.Color4(0, 0, 0.0, 0.0).toHexString();
+  soundButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+  soundButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+  uiTexture.addControl(soundButton);
+
+  // Функция для обновления иконки
+  function updateIcon() {
+    soundButton.image.source = flagSoundOn ? "img/speaker.png" : "img/no_sound.png";
+  }
+
+  // Обработчик клика для Babylon.GUI
+  soundButton.onPointerClickObservable.add(() => {
+    flagSoundOn = !flagSoundOn; // Инвертируем значение
+    updateIcon();
+
+    // Логика управления звуком
+    if (flagSoundOn) {
+      ambientSound.play(); // Включить звук
+    } else {
+      ambientSound.pause(); // Выключить звук
+    };
   });
 
   return scene;
